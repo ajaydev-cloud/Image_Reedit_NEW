@@ -33,6 +33,7 @@
             align-items: center;
             margin-bottom: 28px;
             flex-wrap: wrap;
+            gap: 12px;
         }
         .header h1 {
             font-weight: 600;
@@ -55,6 +56,113 @@
             color: #6b7a93;
             font-size: 13px;
             margin-top: 4px;
+        }
+
+        /* ---------- FILTERS SECTION ---------- */
+        .filters-section {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 20px 24px;
+            border: 1px solid #eef2f6;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+        .filters-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #1a1f36;
+        }
+        .filters-title i {
+            color: #2563eb;
+            margin-right: 8px;
+        }
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            align-items: end;
+        }
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .filter-group label {
+            font-size: 12px;
+            font-weight: 500;
+            color: #5b677b;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        .filter-group input,
+        .filter-group select {
+            padding: 8px 12px;
+            border: 1px solid #d1d9e6;
+            border-radius: 8px;
+            font-size: 13px;
+            background: #fafbfc;
+            transition: border-color 0.2s;
+            width: 100%;
+        }
+        .filter-group input:focus,
+        .filter-group select:focus {
+            outline: none;
+            border-color: #2563eb;
+            background: #ffffff;
+        }
+        .filter-group input[type="date"] {
+            min-width: 140px;
+        }
+        .filter-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .btn-filter {
+            padding: 8px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-filter-primary {
+            background: #2563eb;
+            color: white;
+        }
+        .btn-filter-primary:hover {
+            background: #1d4ed8;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+        .btn-filter-secondary {
+            background: #f1f4f9;
+            color: #4b5563;
+        }
+        .btn-filter-secondary:hover {
+            background: #e5e7eb;
+        }
+        .filter-stats {
+            font-size: 13px;
+            color: #6b7a93;
+            padding: 6px 0;
+        }
+        .filter-stats strong {
+            color: #1a1f36;
+        }
+        .clear-filter-btn {
+            background: none;
+            border: none;
+            color: #ef4444;
+            cursor: pointer;
+            font-size: 12px;
+            text-decoration: underline;
+            padding: 4px 8px;
+        }
+        .clear-filter-btn:hover {
+            color: #dc2626;
         }
 
         /* ---------- CARDS ---------- */
@@ -217,20 +325,33 @@
             color: #6b7a93;
             font-size: 12px;
         }
-        .status-dot {
+        .reject-comment {
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
             display: inline-block;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            margin-right: 6px;
+            font-size: 12px;
+            color: #6b7a93;
         }
-        .status-dot.active { background: #10b981; }
-        .status-dot.pending { background: #f59e0b; }
+        .reject-comment:hover {
+            white-space: normal;
+            overflow: visible;
+            background: #f8fafc;
+            padding: 4px;
+            border-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            position: relative;
+            z-index: 10;
+        }
 
         /* ---------- RESPONSIVE ---------- */
         @media (max-width: 900px) {
             .charts-grid {
                 grid-template-columns: 1fr;
+            }
+            .filters-grid {
+                grid-template-columns: 1fr 1fr;
             }
         }
         @media (max-width: 600px) {
@@ -242,12 +363,18 @@
             .cards {
                 grid-template-columns: 1fr 1fr;
             }
+            .filters-grid {
+                grid-template-columns: 1fr;
+            }
             .table-header {
                 flex-direction: column;
                 align-items: stretch;
             }
             .table-header input {
                 width: 100%;
+            }
+            .filter-actions {
+                flex-wrap: wrap;
             }
         }
         @media (max-width: 400px) {
@@ -269,6 +396,55 @@
             </div>
         </div>
         <span class="badge"><i class="fas fa-database"></i> <span id="rowCount">0</span> records</span>
+    </div>
+
+    <!-- FILTERS SECTION -->
+    <div class="filters-section">
+        <div class="filters-title">
+            <i class="fas fa-sliders-h"></i> Filters
+            <button class="clear-filter-btn" onclick="clearAllFilters()">Clear All Filters</button>
+        </div>
+        <div class="filters-grid">
+            <div class="filter-group">
+                <label for="userFilter"><i class="fas fa-user"></i> User Email</label>
+                <select id="userFilter">
+                    <option value="">All Users</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="actionFilter"><i class="fas fa-tag"></i> Action Type</label>
+                <select id="actionFilter">
+                    <option value="">All Actions</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="dateFrom"><i class="fas fa-calendar-alt"></i> Date From</label>
+                <input type="date" id="dateFrom" />
+            </div>
+            <div class="filter-group">
+                <label for="dateTo"><i class="fas fa-calendar-alt"></i> Date To</label>
+                <input type="date" id="dateTo" />
+            </div>
+            <div class="filter-group">
+                <label for="rejectFilter"><i class="fas fa-comment-slash"></i> Reject Comment</label>
+                <select id="rejectFilter">
+                    <option value="">All</option>
+                    <option value="has">Has Reject Comment</option>
+                    <option value="empty">No Reject Comment</option>
+                </select>
+            </div>
+            <div class="filter-group filter-actions">
+                <button class="btn-filter btn-filter-primary" onclick="applyFilters()">
+                    <i class="fas fa-search"></i> Apply Filters
+                </button>
+                <button class="btn-filter btn-filter-secondary" onclick="clearAllFilters()">
+                    <i class="fas fa-undo"></i> Reset
+                </button>
+            </div>
+        </div>
+        <div class="filter-stats" id="filterStats">
+            Showing <strong id="filteredCount">0</strong> of <strong id="totalCount">0</strong> records
+        </div>
     </div>
 
     <!-- CARDS -->
@@ -337,6 +513,7 @@
                         <th data-sort="action">Action ↕</th>
                         <th data-sort="user">User ↕</th>
                         <th data-sort="date">Created ↕</th>
+                        <th data-sort="reject">Reject Comment</th>
                         <th data-sort="output">Output Image</th>
                     </tr>
                 </thead>
@@ -360,11 +537,12 @@
     (function() {
         // ---------- STATE ----------
         let allData = [];
+        let filteredData = [];
         let currentPage = 1;
         const rowsPerPage = 20;
-        let filteredData = [];
         let sortKey = null;
         let sortAsc = true;
+        let chartInstances = {};
 
         // ---------- HELPER: parse CSV ----------
         function parseCSV(text) {
@@ -416,21 +594,141 @@
                     return;
                 }
                 document.getElementById('updateTime').textContent = new Date().toLocaleString();
-                renderDashboard(allData);
+                populateFilterOptions(allData);
+                filteredData = [...allData];
+                renderDashboard(filteredData);
             })
             .catch(err => {
                 console.warn('Could not load CSV:', err);
                 document.getElementById('rowCount').textContent = '⚠️';
                 document.getElementById('tableBody').innerHTML =
-                    `<tr><td colspan="5" style="text-align:center;padding:40px;color:#6b7a93;">
+                    `<tr><td colspan="6" style="text-align:center;padding:40px;color:#6b7a93;">
                         <i class="fas fa-exclamation-triangle" style="font-size:20px;display:block;margin-bottom:8px;"></i>
                         Could not load CSV file. Make sure <strong>Last_month.CSV.csv</strong> is in the same folder.
                     </td></tr>`;
             });
 
+        // ---------- POPULATE FILTER DROPDOWNS ----------
+        function populateFilterOptions(data) {
+            // User dropdown
+            const userSet = new Set();
+            data.forEach(r => {
+                const u = r['User Details - Rejected By User__email_id'] || 'Unknown';
+                if (u !== 'Unknown') userSet.add(u);
+            });
+            const userSelect = document.getElementById('userFilter');
+            userSelect.innerHTML = '<option value="">All Users</option>';
+            Array.from(userSet).sort().forEach(u => {
+                const opt = document.createElement('option');
+                opt.value = u;
+                opt.textContent = u;
+                userSelect.appendChild(opt);
+            });
+
+            // Action dropdown
+            const actionSet = new Set();
+            data.forEach(r => {
+                const a = r['image_action'] || 'Unknown';
+                if (a !== 'Unknown') actionSet.add(a);
+            });
+            const actionSelect = document.getElementById('actionFilter');
+            actionSelect.innerHTML = '<option value="">All Actions</option>';
+            Array.from(actionSet).sort().forEach(a => {
+                const opt = document.createElement('option');
+                opt.value = a;
+                opt.textContent = a;
+                actionSelect.appendChild(opt);
+            });
+        }
+
+        // ---------- APPLY FILTERS ----------
+        window.applyFilters = function() {
+            const userFilter = document.getElementById('userFilter').value;
+            const actionFilter = document.getElementById('actionFilter').value;
+            const dateFrom = document.getElementById('dateFrom').value;
+            const dateTo = document.getElementById('dateTo').value;
+            const rejectFilter = document.getElementById('rejectFilter').value;
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+
+            filteredData = allData.filter(row => {
+                // User filter
+                if (userFilter) {
+                    const user = row['User Details - Rejected By User__email_id'] || '';
+                    if (user !== userFilter) return false;
+                }
+
+                // Action filter
+                if (actionFilter) {
+                    const action = row['image_action'] || '';
+                    if (action !== actionFilter) return false;
+                }
+
+                // Date filters
+                const dateStr = row['created_on'] || '';
+                if (dateFrom || dateTo) {
+                    const dateParts = dateStr.split(',');
+                    if (dateParts.length >= 2) {
+                        const dayMonth = dateParts[0].trim();
+                        const dateObj = new Date(dayMonth + ', 2026');
+                        if (dateFrom) {
+                            const fromDate = new Date(dateFrom);
+                            if (dateObj < fromDate) return false;
+                        }
+                        if (dateTo) {
+                            const toDate = new Date(dateTo);
+                            toDate.setHours(23, 59, 59);
+                            if (dateObj > toDate) return false;
+                        }
+                    } else if (dateFrom || dateTo) {
+                        // If date parsing fails but filter is set, exclude
+                        return false;
+                    }
+                }
+
+                // Reject comment filter
+                if (rejectFilter === 'has') {
+                    const comment = row['rejected_comment'] || '';
+                    if (!comment || comment.trim() === '') return false;
+                } else if (rejectFilter === 'empty') {
+                    const comment = row['rejected_comment'] || '';
+                    if (comment && comment.trim() !== '') return false;
+                }
+
+                // Search term (for text search)
+                if (searchTerm) {
+                    const searchable = JSON.stringify(row).toLowerCase();
+                    if (!searchable.includes(searchTerm)) return false;
+                }
+
+                return true;
+            });
+
+            currentPage = 1;
+            renderDashboard(filteredData);
+            document.getElementById('filteredCount').textContent = filteredData.length;
+            document.getElementById('totalCount').textContent = allData.length;
+        };
+
+        // ---------- CLEAR FILTERS ----------
+        window.clearAllFilters = function() {
+            document.getElementById('userFilter').value = '';
+            document.getElementById('actionFilter').value = '';
+            document.getElementById('dateFrom').value = '';
+            document.getElementById('dateTo').value = '';
+            document.getElementById('rejectFilter').value = '';
+            document.getElementById('searchInput').value = '';
+            filteredData = [...allData];
+            currentPage = 1;
+            renderDashboard(filteredData);
+            document.getElementById('filteredCount').textContent = filteredData.length;
+            document.getElementById('totalCount').textContent = allData.length;
+        };
+
         // ---------- RENDER DASHBOARD ----------
         function renderDashboard(data) {
-            document.getElementById('rowCount').textContent = data.length;
+            document.getElementById('rowCount').textContent = allData.length;
+            document.getElementById('filteredCount').textContent = data.length;
+            document.getElementById('totalCount').textContent = allData.length;
 
             // ----- CARDS -----
             const total = data.length;
@@ -447,13 +745,14 @@
             document.getElementById('topAction').textContent = topAction[0];
             document.getElementById('actionCount').textContent = Object.keys(actionCounts).length;
 
-            // ----- CHART: action distribution (donut) -----
+            // ----- CHART: action distribution -----
             const actionLabels = Object.keys(actionCounts);
             const actionValues = Object.values(actionCounts);
             const colors = ['#4f46e5', '#7c3aed', '#2563eb', '#0ea5e9', '#06b6d4', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'];
             const bgColors = actionLabels.map((_, i) => colors[i % colors.length]);
 
-            new Chart(document.getElementById('actionChart'), {
+            if (chartInstances.actionChart) chartInstances.actionChart.destroy();
+            chartInstances.actionChart = new Chart(document.getElementById('actionChart'), {
                 type: 'doughnut',
                 data: {
                     labels: actionLabels,
@@ -482,7 +781,7 @@
                 }
             });
 
-            // ----- CHART: user tasks (horizontal bar - top 15) -----
+            // ----- CHART: user tasks -----
             const userCounts = {};
             data.forEach(r => {
                 const u = r['User Details - Rejected By User__email_id'] || 'Unknown';
@@ -495,7 +794,8 @@
             });
             const userValues = sortedUsers.map(u => u[1]);
 
-            new Chart(document.getElementById('userChart'), {
+            if (chartInstances.userChart) chartInstances.userChart.destroy();
+            chartInstances.userChart = new Chart(document.getElementById('userChart'), {
                 type: 'bar',
                 data: {
                     labels: userLabels,
@@ -520,7 +820,7 @@
                 }
             });
 
-            // ----- CHART: timeline (line) -----
+            // ----- CHART: timeline -----
             const dateCounts = {};
             data.forEach(r => {
                 const d = r['created_on'] || '';
@@ -538,7 +838,8 @@
             });
             const timelineData = sortedDates.map(d => dateCounts[d]);
 
-            new Chart(document.getElementById('timelineChart'), {
+            if (chartInstances.timelineChart) chartInstances.timelineChart.destroy();
+            chartInstances.timelineChart = new Chart(document.getElementById('timelineChart'), {
                 type: 'line',
                 data: {
                     labels: sortedDates,
@@ -566,7 +867,7 @@
                 }
             });
 
-            // ----- CHART: stacked bar (action vs user) -----
+            // ----- CHART: stacked bar -----
             const topUsers = sortedUsers.slice(0, 10).map(u => u[0]);
             const actions = Object.keys(actionCounts).slice(0, 8);
             const stackedData = actions.map(action => {
@@ -582,7 +883,8 @@
                 };
             });
 
-            new Chart(document.getElementById('stackedChart'), {
+            if (chartInstances.stackedChart) chartInstances.stackedChart.destroy();
+            chartInstances.stackedChart = new Chart(document.getElementById('stackedChart'), {
                 type: 'bar',
                 data: {
                     labels: topUsers.map(u => u.split('@')[0] || u),
@@ -609,71 +911,15 @@
             });
 
             // ----- TABLE -----
-            filteredData = [...data];
-            renderTable();
-
-            // Search filter
-            document.getElementById('searchInput').addEventListener('input', function(e) {
-                const term = e.target.value.toLowerCase();
-                filteredData = data.filter(row => {
-                    const text = JSON.stringify(row).toLowerCase();
-                    return text.includes(term);
-                });
-                currentPage = 1;
-                renderTable();
-            });
-
-            // Sort
-            document.querySelectorAll('th[data-sort]').forEach(th => {
-                th.addEventListener('click', function() {
-                    const key = this.dataset.sort;
-                    if (sortKey === key) {
-                        sortAsc = !sortAsc;
-                    } else {
-                        sortKey = key;
-                        sortAsc = true;
-                    }
-                    sortData();
-                    renderTable();
-                });
-            });
-
-            // Pagination
-            document.getElementById('prevPage').addEventListener('click', () => {
-                if (currentPage > 1) { currentPage--; renderTable(); }
-            });
-            document.getElementById('nextPage').addEventListener('click', () => {
-                const maxPage = Math.ceil(filteredData.length / rowsPerPage);
-                if (currentPage < maxPage) { currentPage++; renderTable(); }
-            });
-        }
-
-        // ---------- SORT DATA ----------
-        function sortData() {
-            if (!sortKey) return;
-            filteredData.sort((a, b) => {
-                let valA = a[sortKey] || '';
-                let valB = b[sortKey] || '';
-                if (sortKey === 'id') {
-                    valA = parseInt(valA) || 0;
-                    valB = parseInt(valB) || 0;
-                }
-                if (sortKey === 'date') {
-                    valA = new Date(valA) || 0;
-                    valB = new Date(valB) || 0;
-                }
-                if (valA < valB) return sortAsc ? -1 : 1;
-                if (valA > valB) return sortAsc ? 1 : -1;
-                return 0;
-            });
+            renderTable(data);
         }
 
         // ---------- RENDER TABLE ----------
-        function renderTable() {
+        function renderTable(data = filteredData) {
             const tbody = document.getElementById('tableBody');
             const start = (currentPage - 1) * rowsPerPage;
-            const end = Math.min(start + rowsPerPage, filteredData.length);
-            const pageData = filteredData.slice(start, end);
+            const end = Math.min(start + rowsPerPage, data.length);
+            const pageData = data.slice(start, end);
             
             tbody.innerHTML = '';
             pageData.forEach((row, idx) => {
@@ -681,6 +927,7 @@
                 const action = row['image_action'] || '—';
                 const user = row['User Details - Rejected By User__email_id'] || '—';
                 const created = row['created_on'] || '—';
+                const rejectComment = row['rejected_comment'] || '';
                 const output = row['output_image_hres_url'] || row['manual_edited_hres_url'] || '';
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
@@ -688,22 +935,26 @@
                     <td><span class="badge-action">${action}</span></td>
                     <td>${user}</td>
                     <td class="text-muted">${created}</td>
+                    <td><span class="reject-comment" title="${rejectComment}">${rejectComment || '—'}</span></td>
                     <td>${output ? `<a href="${output}" target="_blank"><i class="fas fa-external-link-alt"></i> View</a>` : '—'}</td>
                 `;
                 tbody.appendChild(tr);
             });
 
-            const total = filteredData.length;
+            const total = data.length;
             const maxPage = Math.ceil(total / rowsPerPage) || 1;
             document.getElementById('tableInfo').textContent = `Showing ${total > 0 ? start + 1 : 0} - ${end} of ${total}`;
             document.getElementById('pageInfo').textContent = `Page ${currentPage} of ${maxPage}`;
             
-            // Update button states
             document.getElementById('prevPage').disabled = currentPage <= 1;
             document.getElementById('nextPage').disabled = currentPage >= maxPage;
         }
 
-    })();
-</script>
-</body>
-</html>
+        // ---------- EVENT LISTENERS ----------
+        // Search input
+        document.getElementById('searchInput').addEventListener('input', function() {
+            applyFilters();
+        });
+
+        // Sort
+        document.querySelectorAll
