@@ -350,6 +350,15 @@
             position: relative;
             z-index: 10;
         }
+        .badge-count {
+            background: #e0e7ff;
+            color: #2563eb;
+            padding: 1px 8px;
+            border-radius: 40px;
+            font-size: 11px;
+            font-weight: 500;
+            margin-left: 4px;
+        }
 
         /* ---------- LOADING SPINNER ---------- */
         .spinner {
@@ -456,9 +465,7 @@
             <div class="filter-group">
                 <label for="rejectFilter"><i class="fas fa-comment-slash"></i> Reject Comment</label>
                 <select id="rejectFilter">
-                    <option value="">All</option>
-                    <option value="has">Has Reject Comment</option>
-                    <option value="empty">No Reject Comment</option>
+                    <option value="">All Comments</option>
                 </select>
             </div>
             <div class="filter-group filter-actions">
@@ -658,7 +665,6 @@
             allData = data;
             dataLoaded = true;
 
-            // Hide loading, show everything
             document.getElementById('loadingIndicator').style.display = 'none';
             document.getElementById('filtersSection').style.display = 'block';
             document.getElementById('cards').style.display = 'grid';
@@ -688,16 +694,6 @@
                     <button onclick="location.reload()" style="padding:10px 24px;background:#2563eb;color:white;border:none;border-radius:8px;cursor:pointer;">
                         <i class="fas fa-sync-alt"></i> Retry
                     </button>
-                    <br><br>
-                    <details style="text-align:left;max-width:600px;margin:0 auto;">
-                        <summary style="cursor:pointer;color:#2563eb;">Troubleshooting Tips</summary>
-                        <ul style="padding:16px;background:#f8fafc;border-radius:8px;text-align:left;">
-                            <li>✅ File name: <strong>Last_month.CSV.csv</strong> (exact match)</li>
-                            <li>✅ File must be in the same folder as index.html</li>
-                            <li>✅ Check file extension (CSV, not txt)</li>
-                            <li>✅ GitHub Pages: file names are case-sensitive</li>
-                        </ul>
-                    </details>
                 </div>
             `;
             document.getElementById('rowCount').textContent = '⚠️ Error';
@@ -705,6 +701,7 @@
 
         // ---------- POPULATE FILTER DROPDOWNS ----------
         function populateFilterOptions(data) {
+            // User dropdown
             const userSet = new Set();
             data.forEach(r => {
                 const u = r['User Details - Rejected By User__email_id'] || 'Unknown';
@@ -719,6 +716,7 @@
                 userSelect.appendChild(opt);
             });
 
+            // Action dropdown
             const actionSet = new Set();
             data.forEach(r => {
                 const a = r['image_action'] || 'Unknown';
@@ -731,6 +729,45 @@
                 opt.value = a;
                 opt.textContent = a;
                 actionSelect.appendChild(opt);
+            });
+
+            // ---------- REJECT COMMENT DROPDOWN (NEW) ----------
+            const rejectSet = new Set();
+            data.forEach(r => {
+                const comment = r['rejected_comment'] || '';
+                if (comment && comment.trim() !== '') {
+                    rejectSet.add(comment.trim());
+                }
+            });
+            const rejectSelect = document.getElementById('rejectFilter');
+            rejectSelect.innerHTML = '<option value="">All Comments</option>';
+            
+            // Add "Has Any Comment" option
+            const hasAnyOpt = document.createElement('option');
+            hasAnyOpt.value = '__HAS_ANY__';
+            hasAnyOpt.textContent = '📝 Has Any Comment';
+            rejectSelect.appendChild(hasAnyOpt);
+            
+            // Add "Empty Comment" option
+            const emptyOpt = document.createElement('option');
+            emptyOpt.value = '__EMPTY__';
+            emptyOpt.textContent = '📭 No Comment';
+            rejectSelect.appendChild(emptyOpt);
+            
+            // Add separator
+            const separator = document.createElement('option');
+            separator.disabled = true;
+            separator.textContent = '──────────';
+            rejectSelect.appendChild(separator);
+            
+            // Add all unique comments
+            Array.from(rejectSet).sort().forEach(comment => {
+                const opt = document.createElement('option');
+                opt.value = comment;
+                // Count occurrences
+                const count = data.filter(r => (r['rejected_comment'] || '').trim() === comment).length;
+                opt.textContent = `${comment} (${count})`;
+                rejectSelect.appendChild(opt);
             });
         }
 
@@ -772,13 +809,21 @@
                         return false;
                     }
                 }
-                if (rejectFilter === 'has') {
-                    const comment = row['rejected_comment'] || '';
-                    if (!comment || comment.trim() === '') return false;
-                } else if (rejectFilter === 'empty') {
-                    const comment = row['rejected_comment'] || '';
-                    if (comment && comment.trim() !== '') return false;
+                
+                // ---------- REJECT COMMENT FILTER (UPDATED) ----------
+                const comment = row['rejected_comment'] || '';
+                const hasComment = comment && comment.trim() !== '';
+                
+                if (rejectFilter === '__HAS_ANY__') {
+                    if (!hasComment) return false;
+                } else if (rejectFilter === '__EMPTY__') {
+                    if (hasComment) return false;
+                } else if (rejectFilter) {
+                    // Exact match on comment
+                    if (comment.trim() !== rejectFilter) return false;
                 }
+                // If rejectFilter is empty string, show all
+
                 if (searchTerm) {
                     const searchable = JSON.stringify(row).toLowerCase();
                     if (!searchable.includes(searchTerm)) return false;
