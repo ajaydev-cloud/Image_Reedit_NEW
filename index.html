@@ -90,6 +90,11 @@
             font-weight: 600;
             margin-bottom: 16px;
             color: #1a1f36;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
         }
         .filters-title i { color: #4F46E5; margin-right: 8px; }
         .filters-grid {
@@ -125,21 +130,7 @@
             background: #ffffff;
         }
         .filter-group input[type="date"] { min-width: 130px; }
-        .filter-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-        .btn-filter {
-            padding: 8px 20px;
-            border: none;
-            border-radius: 8px;
-            font-size: 13px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .btn-filter-primary { background: #4F46E5; color: white; }
-        .btn-filter-primary:hover { background: #4338CA; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(79,70,229,0.3); }
-        .btn-filter-secondary { background: #f1f4f9; color: #4b5563; }
-        .btn-filter-secondary:hover { background: #e5e7eb; }
-        .filter-stats { font-size: 13px; color: #6b7a93; padding: 6px 0; }
+        .filter-stats { font-size: 13px; color: #6b7a93; padding: 6px 0; margin-top: 12px; }
         .filter-stats strong { color: #1a1f36; }
         .clear-filter-btn {
             background: none;
@@ -432,7 +423,6 @@
             .upload-section input[type="file"] { width: 100%; }
             .table-header { flex-direction: column; align-items: stretch; }
             .table-header input { width: 100%; }
-            .filter-actions { flex-wrap: wrap; }
             .gallery-grid { grid-template-columns: 1fr; }
             .gallery-card .image-grid { height: 150px; }
         }
@@ -465,7 +455,7 @@
 
     <div class="filters-section" id="filtersSection">
         <div class="filters-title">
-            <i class="fas fa-sliders-h"></i> Filters
+            <span><i class="fas fa-sliders-h"></i> Filters</span>
             <button class="clear-filter-btn" onclick="clearAllFilters()">Clear All Filters</button>
         </div>
         <div class="filters-grid">
@@ -492,14 +482,6 @@
             <div class="filter-group">
                 <label for="rejectFilter"><i class="fas fa-comment-slash"></i> Reject Comment</label>
                 <select id="rejectFilter"><option value="">All Comments</option></select>
-            </div>
-            <div class="filter-group filter-actions">
-                <button class="btn-filter btn-filter-primary" onclick="applyFilters()">
-                    <i class="fas fa-search"></i> Apply Filters
-                </button>
-                <button class="btn-filter btn-filter-secondary" onclick="clearAllFilters()">
-                    <i class="fas fa-undo"></i> Reset
-                </button>
             </div>
         </div>
         <div class="filter-stats" id="filterStats">
@@ -561,7 +543,7 @@
         <div class="table-wrapper">
             <div class="table-header">
                 <h3><i class="fas fa-list-ul" style="margin-right:8px;color:#4F46E5;"></i>All Records</h3>
-                <input type="text" id="searchInput" placeholder="🔍 Search by ID, user, action..." oninput="applyFilters()" />
+                <input type="text" id="searchInput" placeholder="🔍 Search by ID, user, action..." />
             </div>
             <div class="table-scroll">
                 <table id="dataTable">
@@ -708,7 +690,6 @@
     }
 
     function getEnterprise(row) {
-        // Try multiple possible field names
         const fields = [
             'Enterprise Details - Enterprise__name',
             'enterprise_name',
@@ -775,7 +756,6 @@
             if (rc !== 'None') rejectSet.add(rc);
         });
 
-        // User filter
         const userSelect = document.getElementById('userFilter');
         userSelect.innerHTML = '<option value="">All Users</option>';
         Array.from(userSet).sort().forEach(u => {
@@ -785,7 +765,6 @@
             userSelect.appendChild(opt);
         });
 
-        // Enterprise filter
         const enterpriseSelect = document.getElementById('enterpriseFilter');
         enterpriseSelect.innerHTML = '<option value="">All Enterprises</option>';
         Array.from(enterpriseSet).sort().forEach(e => {
@@ -795,7 +774,6 @@
             enterpriseSelect.appendChild(opt);
         });
 
-        // Action filter
         const actionSelect = document.getElementById('actionFilter');
         actionSelect.innerHTML = '<option value="">All Actions</option>';
         Array.from(actionSet).sort().forEach(a => {
@@ -805,7 +783,6 @@
             actionSelect.appendChild(opt);
         });
 
-        // Reject comment filter
         const rejectSelect = document.getElementById('rejectFilter');
         rejectSelect.innerHTML = '<option value="">All Comments</option>';
         Array.from(rejectSet).sort().forEach(rc => {
@@ -816,6 +793,7 @@
         });
     }
 
+    // AUTO-APPLY FILTERS - called on any filter change
     function applyFilters() {
         const userFilter = document.getElementById('userFilter').value;
         const enterpriseFilter = document.getElementById('enterpriseFilter').value;
@@ -861,6 +839,22 @@
         galleryPage = 1;
         currentPage = 1;
         renderCurrentView();
+    }
+
+    // Setup auto-filter on all filter inputs
+    function setupAutoFilter() {
+        const filterIds = ['userFilter', 'enterpriseFilter', 'actionFilter', 'dateFrom', 'dateTo', 'rejectFilter'];
+        filterIds.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.addEventListener('change', applyFilters);
+                el.addEventListener('input', applyFilters);
+            }
+        });
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            searchInput.addEventListener('input', applyFilters);
+        }
     }
 
     function clearAllFilters() {
@@ -1200,6 +1194,9 @@
         document.getElementById('analyticsView').style.display = 'block';
         document.getElementById('galleryView').style.display = 'none';
         document.getElementById('tableView').style.display = 'none';
+        
+        // Setup auto-filter on all filter inputs
+        setupAutoFilter();
     });
 </script>
 </body>
