@@ -57,6 +57,11 @@
             font-size: 13px;
             margin-top: 4px;
         }
+        .loading-error {
+            color: #ef4444;
+            font-size: 13px;
+            margin-top: 4px;
+        }
 
         /* ---------- FILTERS SECTION ---------- */
         .filters-section {
@@ -79,7 +84,7 @@
         }
         .filters-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: 16px;
             align-items: end;
         }
@@ -112,12 +117,13 @@
             background: #ffffff;
         }
         .filter-group input[type="date"] {
-            min-width: 140px;
+            min-width: 130px;
         }
         .filter-actions {
             display: flex;
             gap: 10px;
             align-items: center;
+            flex-wrap: wrap;
         }
         .btn-filter {
             padding: 8px 20px;
@@ -326,7 +332,7 @@
             font-size: 12px;
         }
         .reject-comment {
-            max-width: 200px;
+            max-width: 180px;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
@@ -343,6 +349,27 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             position: relative;
             z-index: 10;
+        }
+
+        /* ---------- LOADING SPINNER ---------- */
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #e2e8f0;
+            border-top: 3px solid #2563eb;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 8px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .loading-text {
+            color: #6b7a93;
+            padding: 40px;
+            text-align: center;
         }
 
         /* ---------- RESPONSIVE ---------- */
@@ -394,12 +421,13 @@
                 <i class="fas fa-sync-alt" style="font-size:12px;"></i> 
                 Last updated: <span id="updateTime">Loading...</span>
             </div>
+            <div id="errorMessage" class="loading-error"></div>
         </div>
-        <span class="badge"><i class="fas fa-database"></i> <span id="rowCount">0</span> records</span>
+        <span class="badge"><i class="fas fa-database"></i> <span id="rowCount">Loading...</span></span>
     </div>
 
     <!-- FILTERS SECTION -->
-    <div class="filters-section">
+    <div class="filters-section" id="filtersSection" style="display:none;">
         <div class="filters-title">
             <i class="fas fa-sliders-h"></i> Filters
             <button class="clear-filter-btn" onclick="clearAllFilters()">Clear All Filters</button>
@@ -448,7 +476,7 @@
     </div>
 
     <!-- CARDS -->
-    <div class="cards" id="cards">
+    <div class="cards" id="cards" style="display:none;">
         <div class="card">
             <i class="fas fa-tasks icon"></i>
             <div class="label">Total Tasks</div>
@@ -475,32 +503,35 @@
         </div>
     </div>
 
-    <!-- CHARTS -->
-    <div class="charts-grid">
-        <!-- Donut: Action distribution -->
-        <div class="chart-card">
-            <h3><i class="fas fa-chart-pie" style="margin-right:8px;color:#2563eb;"></i>Task Distribution by Action</h3>
-            <div class="chart-container"><canvas id="actionChart"></canvas></div>
-        </div>
-        <!-- Bar: User tasks -->
-        <div class="chart-card">
-            <h3><i class="fas fa-users" style="margin-right:8px;color:#2563eb;"></i>Top 15 Users by Tasks</h3>
-            <div class="chart-container"><canvas id="userChart"></canvas></div>
-        </div>
-        <!-- Line: Timeline -->
-        <div class="chart-card full-width">
-            <h3><i class="fas fa-calendar-alt" style="margin-right:8px;color:#2563eb;"></i>Tasks by Date</h3>
-            <div class="chart-container"><canvas id="timelineChart"></canvas></div>
-        </div>
-        <!-- Stacked bar: Action vs User -->
-        <div class="chart-card full-width">
-            <h3><i class="fas fa-layer-group" style="margin-right:8px;color:#2563eb;"></i>Action vs Top Users (stacked)</h3>
-            <div class="chart-container"><canvas id="stackedChart"></canvas></div>
+    <!-- LOADING / CHARTS -->
+    <div id="loadingIndicator" class="loading-text">
+        <div class="spinner"></div>
+        Loading data from CSV file...
+    </div>
+
+    <div id="chartsContainer" style="display:none;">
+        <div class="charts-grid">
+            <div class="chart-card">
+                <h3><i class="fas fa-chart-pie" style="margin-right:8px;color:#2563eb;"></i>Task Distribution by Action</h3>
+                <div class="chart-container"><canvas id="actionChart"></canvas></div>
+            </div>
+            <div class="chart-card">
+                <h3><i class="fas fa-users" style="margin-right:8px;color:#2563eb;"></i>Top 15 Users by Tasks</h3>
+                <div class="chart-container"><canvas id="userChart"></canvas></div>
+            </div>
+            <div class="chart-card full-width">
+                <h3><i class="fas fa-calendar-alt" style="margin-right:8px;color:#2563eb;"></i>Tasks by Date</h3>
+                <div class="chart-container"><canvas id="timelineChart"></canvas></div>
+            </div>
+            <div class="chart-card full-width">
+                <h3><i class="fas fa-layer-group" style="margin-right:8px;color:#2563eb;"></i>Action vs Top Users (stacked)</h3>
+                <div class="chart-container"><canvas id="stackedChart"></canvas></div>
+            </div>
         </div>
     </div>
 
     <!-- TABLE -->
-    <div class="table-wrapper">
+    <div class="table-wrapper" id="tableWrapper" style="display:none;">
         <div class="table-header">
             <h3><i class="fas fa-list-ul" style="margin-right:8px;color:#2563eb;"></i>All Records</h3>
             <input type="text" id="searchInput" placeholder="🔍 Search by ID, user, action..." />
@@ -518,7 +549,6 @@
                     </tr>
                 </thead>
                 <tbody id="tableBody">
-                    <!-- rows inserted by JS -->
                 </tbody>
             </table>
         </div>
@@ -543,6 +573,7 @@
         let sortKey = null;
         let sortAsc = true;
         let chartInstances = {};
+        let dataLoaded = false;
 
         // ---------- HELPER: parse CSV ----------
         function parseCSV(text) {
@@ -579,38 +610,101 @@
             return result;
         }
 
-        // ---------- LOAD CSV ----------
-        const csvFile = 'Last_month.CSV.csv';
+        // ---------- TRY MULTIPLE CSV PATHS ----------
+        function loadCSV() {
+            const csvPaths = [
+                'Last_month.CSV.csv',
+                './Last_month.CSV.csv',
+                '/Last_month.CSV.csv',
+                'Last_month.CSV',
+                'last_month.csv'
+            ];
 
-        fetch(csvFile)
-            .then(res => {
-                if (!res.ok) throw new Error('CSV not found');
-                return res.text();
-            })
-            .then(text => {
-                allData = parseCSV(text);
-                if (allData.length === 0) {
-                    document.getElementById('rowCount').textContent = '0';
+            let pathIndex = 0;
+
+            function tryNextPath() {
+                if (pathIndex >= csvPaths.length) {
+                    showError('Could not find CSV file. Please make sure "Last_month.CSV.csv" is in the same folder.');
                     return;
                 }
-                document.getElementById('updateTime').textContent = new Date().toLocaleString();
-                populateFilterOptions(allData);
-                filteredData = [...allData];
-                renderDashboard(filteredData);
-            })
-            .catch(err => {
-                console.warn('Could not load CSV:', err);
-                document.getElementById('rowCount').textContent = '⚠️';
-                document.getElementById('tableBody').innerHTML =
-                    `<tr><td colspan="6" style="text-align:center;padding:40px;color:#6b7a93;">
-                        <i class="fas fa-exclamation-triangle" style="font-size:20px;display:block;margin-bottom:8px;"></i>
-                        Could not load CSV file. Make sure <strong>Last_month.CSV.csv</strong> is in the same folder.
-                    </td></tr>`;
-            });
+
+                const path = csvPaths[pathIndex];
+                console.log('Attempting to load:', path);
+
+                fetch(path)
+                    .then(res => {
+                        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                        return res.text();
+                    })
+                    .then(text => {
+                        if (text.trim().length < 10) throw new Error('File is empty or too small');
+                        const data = parseCSV(text);
+                        if (data.length === 0) throw new Error('No data parsed');
+                        console.log(`✅ Loaded ${data.length} records from:`, path);
+                        onDataLoaded(data);
+                    })
+                    .catch(err => {
+                        console.warn(`❌ Failed to load from "${path}":`, err.message);
+                        pathIndex++;
+                        tryNextPath();
+                    });
+            }
+
+            tryNextPath();
+        }
+
+        // ---------- DATA LOADED SUCCESSFULLY ----------
+        function onDataLoaded(data) {
+            allData = data;
+            dataLoaded = true;
+
+            // Hide loading, show everything
+            document.getElementById('loadingIndicator').style.display = 'none';
+            document.getElementById('filtersSection').style.display = 'block';
+            document.getElementById('cards').style.display = 'grid';
+            document.getElementById('chartsContainer').style.display = 'block';
+            document.getElementById('tableWrapper').style.display = 'block';
+
+            document.getElementById('rowCount').textContent = data.length;
+            document.getElementById('updateTime').textContent = new Date().toLocaleString();
+
+            populateFilterOptions(data);
+            filteredData = [...data];
+            renderDashboard(filteredData);
+        }
+
+        // ---------- SHOW ERROR ----------
+        function showError(message) {
+            document.getElementById('loadingIndicator').innerHTML = `
+                <div style="color:#ef4444;padding:20px;">
+                    <i class="fas fa-exclamation-circle" style="font-size:40px;display:block;margin-bottom:16px;"></i>
+                    <strong>${message}</strong>
+                    <br><br>
+                    <span style="font-size:13px;color:#6b7a93;">
+                        Make sure <strong>Last_month.CSV.csv</strong> is in the same folder as index.html
+                        <br>File name is case-sensitive!
+                    </span>
+                    <br><br>
+                    <button onclick="location.reload()" style="padding:10px 24px;background:#2563eb;color:white;border:none;border-radius:8px;cursor:pointer;">
+                        <i class="fas fa-sync-alt"></i> Retry
+                    </button>
+                    <br><br>
+                    <details style="text-align:left;max-width:600px;margin:0 auto;">
+                        <summary style="cursor:pointer;color:#2563eb;">Troubleshooting Tips</summary>
+                        <ul style="padding:16px;background:#f8fafc;border-radius:8px;text-align:left;">
+                            <li>✅ File name: <strong>Last_month.CSV.csv</strong> (exact match)</li>
+                            <li>✅ File must be in the same folder as index.html</li>
+                            <li>✅ Check file extension (CSV, not txt)</li>
+                            <li>✅ GitHub Pages: file names are case-sensitive</li>
+                        </ul>
+                    </details>
+                </div>
+            `;
+            document.getElementById('rowCount').textContent = '⚠️ Error';
+        }
 
         // ---------- POPULATE FILTER DROPDOWNS ----------
         function populateFilterOptions(data) {
-            // User dropdown
             const userSet = new Set();
             data.forEach(r => {
                 const u = r['User Details - Rejected By User__email_id'] || 'Unknown';
@@ -625,7 +719,6 @@
                 userSelect.appendChild(opt);
             });
 
-            // Action dropdown
             const actionSet = new Set();
             data.forEach(r => {
                 const a = r['image_action'] || 'Unknown';
@@ -643,6 +736,7 @@
 
         // ---------- APPLY FILTERS ----------
         window.applyFilters = function() {
+            if (!dataLoaded) return;
             const userFilter = document.getElementById('userFilter').value;
             const actionFilter = document.getElementById('actionFilter').value;
             const dateFrom = document.getElementById('dateFrom').value;
@@ -651,19 +745,14 @@
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
 
             filteredData = allData.filter(row => {
-                // User filter
                 if (userFilter) {
                     const user = row['User Details - Rejected By User__email_id'] || '';
                     if (user !== userFilter) return false;
                 }
-
-                // Action filter
                 if (actionFilter) {
                     const action = row['image_action'] || '';
                     if (action !== actionFilter) return false;
                 }
-
-                // Date filters
                 const dateStr = row['created_on'] || '';
                 if (dateFrom || dateTo) {
                     const dateParts = dateStr.split(',');
@@ -680,12 +769,9 @@
                             if (dateObj > toDate) return false;
                         }
                     } else if (dateFrom || dateTo) {
-                        // If date parsing fails but filter is set, exclude
                         return false;
                     }
                 }
-
-                // Reject comment filter
                 if (rejectFilter === 'has') {
                     const comment = row['rejected_comment'] || '';
                     if (!comment || comment.trim() === '') return false;
@@ -693,13 +779,10 @@
                     const comment = row['rejected_comment'] || '';
                     if (comment && comment.trim() !== '') return false;
                 }
-
-                // Search term (for text search)
                 if (searchTerm) {
                     const searchable = JSON.stringify(row).toLowerCase();
                     if (!searchable.includes(searchTerm)) return false;
                 }
-
                 return true;
             });
 
@@ -726,11 +809,9 @@
 
         // ---------- RENDER DASHBOARD ----------
         function renderDashboard(data) {
-            document.getElementById('rowCount').textContent = allData.length;
             document.getElementById('filteredCount').textContent = data.length;
             document.getElementById('totalCount').textContent = allData.length;
 
-            // ----- CARDS -----
             const total = data.length;
             const users = [...new Set(data.map(r => r['User Details - Rejected By User__email_id'] || 'Unknown'))];
             const actionCounts = {};
@@ -910,7 +991,6 @@
                 }
             });
 
-            // ----- TABLE -----
             renderTable(data);
         }
 
@@ -951,12 +1031,10 @@
         }
 
         // ---------- EVENT LISTENERS ----------
-        // Search input
         document.getElementById('searchInput').addEventListener('input', function() {
             applyFilters();
         });
 
-        // Sort
         document.querySelectorAll('th[data-sort]').forEach(th => {
             th.addEventListener('click', function() {
                 const key = this.dataset.sort;
@@ -986,7 +1064,6 @@
             });
         });
 
-        // Pagination
         document.getElementById('prevPage').addEventListener('click', () => {
             if (currentPage > 1) { currentPage--; renderTable(filteredData); }
         });
@@ -995,15 +1072,16 @@
             if (currentPage < maxPage) { currentPage++; renderTable(filteredData); }
         });
 
-        // Enter key on date inputs triggers filter
         document.querySelectorAll('#dateFrom, #dateTo').forEach(input => {
             input.addEventListener('change', applyFilters);
         });
 
-        // Dropdown changes trigger filter
         document.querySelectorAll('#userFilter, #actionFilter, #rejectFilter').forEach(select => {
             select.addEventListener('change', applyFilters);
         });
+
+        // ---------- START LOADING ----------
+        loadCSV();
 
     })();
 </script>
