@@ -4,27 +4,18 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Image Re-edit Dashboard</title>
-    <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
-    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         /* ---------- RESET & BASE ---------- */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             background: #f6f8fc;
             color: #1a1f36;
             padding: 24px;
         }
-        .dashboard {
-            max-width: 1440px;
-            margin: 0 auto;
-        }
+        .dashboard { max-width: 1440px; margin: 0 auto; }
 
         /* ---------- HEADER ---------- */
         .header {
@@ -40,13 +31,10 @@
             font-size: 28px;
             letter-spacing: -0.3px;
         }
-        .header h1 i {
-            color: #2563eb;
-            margin-right: 10px;
-        }
+        .header h1 i { color: #4F46E5; margin-right: 10px; }
         .header .badge {
             background: #e0e7ff;
-            color: #2563eb;
+            color: #4F46E5;
             padding: 6px 16px;
             border-radius: 40px;
             font-size: 14px;
@@ -86,16 +74,9 @@
             flex: 1;
             min-width: 180px;
         }
-        .upload-section input[type="file"]:hover {
-            border-color: #2563eb;
-        }
-        .upload-section .file-info {
-            font-size: 13px;
-            color: #6b7a93;
-        }
-        .upload-section .file-info strong {
-            color: #1a1f36;
-        }
+        .upload-section input[type="file"]:hover { border-color: #4F46E5; }
+        .upload-section .file-info { font-size: 13px; color: #6b7a93; }
+        .upload-section .file-info strong { color: #1a1f36; }
         .upload-btn {
             padding: 8px 24px;
             border: none;
@@ -103,38 +84,21 @@
             font-size: 13px;
             font-weight: 500;
             cursor: pointer;
-            background: #2563eb;
+            background: #4F46E5;
             color: white;
             transition: all 0.2s;
             white-space: nowrap;
         }
         .upload-btn:hover {
-            background: #1d4ed8;
+            background: #4338CA;
             transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
         }
-        .upload-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-        .upload-status {
-            font-size: 13px;
-            padding: 4px 12px;
-            border-radius: 6px;
-        }
-        .upload-status.success {
-            color: #10b981;
-            background: #d1fae5;
-        }
-        .upload-status.error {
-            color: #ef4444;
-            background: #fee2e2;
-        }
-        .upload-status.loading {
-            color: #2563eb;
-            background: #e0e7ff;
-        }
+        .upload-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .upload-status { font-size: 13px; padding: 4px 12px; border-radius: 6px; }
+        .upload-status.success { color: #10b981; background: #d1fae5; }
+        .upload-status.error { color: #ef4444; background: #fee2e2; }
+        .upload-status.loading { color: #4F46E5; background: #e0e7ff; }
 
         /* ---------- FILTERS SECTION ---------- */
         .filters-section {
@@ -151,10 +115,7 @@
             margin-bottom: 16px;
             color: #1a1f36;
         }
-        .filters-title i {
-            color: #2563eb;
-            margin-right: 8px;
-        }
+        .filters-title i { color: #4F46E5; margin-right: 8px; }
         .filters-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -186,12 +147,10 @@
         .filter-group input:focus,
         .filter-group select:focus {
             outline: none;
-            border-color: #2563eb;
+            border-color: #4F46E5;
             background: #ffffff;
         }
-        .filter-group input[type="date"] {
-            min-width: 130px;
-        }
+        .filter-group input[type="date"] { min-width: 130px; }
         .filter-actions {
             display: flex;
             gap: 10px;
@@ -208,29 +167,25 @@
             transition: all 0.2s;
         }
         .btn-filter-primary {
-            background: #2563eb;
+            background: #4F46E5;
             color: white;
         }
         .btn-filter-primary:hover {
-            background: #1d4ed8;
+            background: #4338CA;
             transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
         }
         .btn-filter-secondary {
             background: #f1f4f9;
             color: #4b5563;
         }
-        .btn-filter-secondary:hover {
-            background: #e5e7eb;
-        }
+        .btn-filter-secondary:hover { background: #e5e7eb; }
         .filter-stats {
             font-size: 13px;
             color: #6b7a93;
             padding: 6px 0;
         }
-        .filter-stats strong {
-            color: #1a1f36;
-        }
+        .filter-stats strong { color: #1a1f36; }
         .clear-filter-btn {
             background: none;
             border: none;
@@ -240,9 +195,7 @@
             text-decoration: underline;
             padding: 4px 8px;
         }
-        .clear-filter-btn:hover {
-            color: #dc2626;
-        }
+        .clear-filter-btn:hover { color: #dc2626; }
 
         /* ---------- VIEW TOGGLE ---------- */
         .view-toggle {
@@ -264,17 +217,13 @@
             background: transparent;
             color: #5b677b;
         }
-        .view-toggle button:hover {
-            background: rgba(255,255,255,0.5);
-        }
+        .view-toggle button:hover { background: rgba(255,255,255,0.5); }
         .view-toggle button.active {
             background: #ffffff;
             color: #1a1f36;
             box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         }
-        .view-toggle button i {
-            margin-right: 6px;
-        }
+        .view-toggle button i { margin-right: 6px; }
 
         /* ---------- CHART GRID ---------- */
         .charts-grid {
@@ -300,11 +249,28 @@
             position: relative;
             height: 250px;
         }
-        .chart-card.full-width {
-            grid-column: 1 / -1;
+        .chart-card.full-width { grid-column: 1 / -1; }
+        .chart-card.full-width .chart-container { height: 200px; }
+
+        /* ---------- LEGEND COLOR INDICATORS ---------- */
+        .color-swatch {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+            margin-right: 6px;
         }
-        .chart-card.full-width .chart-container {
-            height: 200px;
+        .color-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 16px;
+            padding: 10px 0;
+            font-size: 12px;
+            color: #5b677b;
+        }
+        .color-list span {
+            display: flex;
+            align-items: center;
         }
 
         /* ---------- GALLERY VIEW ---------- */
@@ -347,9 +313,7 @@
             object-fit: cover;
             transition: transform 0.3s ease;
         }
-        .gallery-card .image-grid .img-wrapper img:hover {
-            transform: scale(1.05);
-        }
+        .gallery-card .image-grid .img-wrapper img:hover { transform: scale(1.05); }
         .gallery-card .image-grid .img-wrapper .placeholder {
             color: #9ca3af;
             font-size: 11px;
@@ -369,13 +333,11 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
-        .gallery-card .gallery-info {
-            padding: 12px 16px;
-        }
+        .gallery-card .gallery-info { padding: 12px 16px; }
         .gallery-card .gallery-info .gallery-id {
             font-size: 12px;
             font-weight: 600;
-            color: #4f46e5;
+            color: #4F46E5;
         }
         .gallery-card .gallery-info .gallery-meta {
             display: flex;
@@ -385,9 +347,7 @@
             flex-wrap: wrap;
             gap: 4px;
         }
-        .gallery-card .gallery-info .gallery-meta .badge-action {
-            font-size: 11px;
-        }
+        .gallery-card .gallery-info .gallery-meta .badge-action { font-size: 11px; }
         .gallery-card .gallery-info .gallery-meta .gallery-user {
             font-size: 12px;
             color: #6b7a93;
@@ -405,10 +365,7 @@
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
-        .gallery-load-more {
-            text-align: center;
-            padding: 20px;
-        }
+        .gallery-load-more { text-align: center; padding: 20px; }
         .gallery-load-more button {
             padding: 10px 32px;
             border: 1px solid #d1d9e6;
@@ -419,9 +376,7 @@
             font-weight: 500;
             transition: all 0.2s;
         }
-        .gallery-load-more button:hover {
-            background: #f1f4f9;
-        }
+        .gallery-load-more button:hover { background: #f1f4f9; }
         .gallery-empty {
             text-align: center;
             padding: 60px 20px;
@@ -450,10 +405,7 @@
             flex-wrap: wrap;
             gap: 10px;
         }
-        .table-header h3 {
-            font-size: 15px;
-            font-weight: 600;
-        }
+        .table-header h3 { font-size: 15px; font-weight: 600; }
         .table-header input {
             padding: 8px 14px;
             border: 1px solid #d1d9e6;
@@ -464,11 +416,9 @@
         }
         .table-header input:focus {
             outline: none;
-            border-color: #2563eb;
+            border-color: #4F46E5;
         }
-        .table-scroll {
-            overflow-x: auto;
-        }
+        .table-scroll { overflow-x: auto; }
         table {
             width: 100%;
             border-collapse: collapse;
@@ -485,30 +435,24 @@
             cursor: pointer;
             user-select: none;
         }
-        th:hover {
-            background: #f1f4f9;
-        }
+        th:hover { background: #f1f4f9; }
         td {
             padding: 10px 8px;
             border-bottom: 1px solid #edf2f7;
             color: #1e293b;
             vertical-align: middle;
         }
-        tr:hover td {
-            background: #fafcff;
-        }
+        tr:hover td { background: #fafcff; }
         td a {
-            color: #2563eb;
+            color: #4F46E5;
             text-decoration: none;
             font-weight: 500;
             word-break: break-all;
         }
-        td a:hover {
-            text-decoration: underline;
-        }
+        td a:hover { text-decoration: underline; }
         .badge-action {
             background: #eef2ff;
-            color: #4f46e5;
+            color: #4F46E5;
             padding: 2px 10px;
             border-radius: 40px;
             font-size: 12px;
@@ -516,10 +460,7 @@
             white-space: nowrap;
             display: inline-block;
         }
-        .text-muted {
-            color: #6b7a93;
-            font-size: 12px;
-        }
+        .text-muted { color: #6b7a93; font-size: 12px; }
         .reject-comment {
             max-width: 180px;
             overflow: hidden;
@@ -546,7 +487,7 @@
             width: 20px;
             height: 20px;
             border: 3px solid #e2e8f0;
-            border-top: 3px solid #2563eb;
+            border-top: 3px solid #4F46E5;
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
             margin-right: 8px;
@@ -616,15 +557,11 @@
         <div class="filters-grid">
             <div class="filter-group">
                 <label for="userFilter"><i class="fas fa-user"></i> User Email</label>
-                <select id="userFilter">
-                    <option value="">All Users</option>
-                </select>
+                <select id="userFilter"><option value="">All Users</option></select>
             </div>
             <div class="filter-group">
                 <label for="actionFilter"><i class="fas fa-tag"></i> Action Type</label>
-                <select id="actionFilter">
-                    <option value="">All Actions</option>
-                </select>
+                <select id="actionFilter"><option value="">All Actions</option></select>
             </div>
             <div class="filter-group">
                 <label for="dateFrom"><i class="fas fa-calendar-alt"></i> Date From</label>
@@ -636,9 +573,7 @@
             </div>
             <div class="filter-group">
                 <label for="rejectFilter"><i class="fas fa-comment-slash"></i> Reject Comment</label>
-                <select id="rejectFilter">
-                    <option value="">All Comments</option>
-                </select>
+                <select id="rejectFilter"><option value="">All Comments</option></select>
             </div>
             <div class="filter-group filter-actions">
                 <button class="btn-filter btn-filter-primary" onclick="applyFilters()">
@@ -667,7 +602,7 @@
         </button>
     </div>
 
-    <!-- LOADING / VIEWS -->
+    <!-- LOADING -->
     <div id="loadingIndicator" class="loading-text">
         <div class="spinner"></div>
         Loading data...
@@ -677,19 +612,21 @@
     <div id="analyticsView" style="display:none;">
         <div class="charts-grid">
             <div class="chart-card">
-                <h3><i class="fas fa-chart-pie" style="margin-right:8px;color:#2563eb;"></i>Task Distribution by Action</h3>
+                <h3><i class="fas fa-chart-pie" style="margin-right:8px;color:#4F46E5;"></i>Task Distribution by Action</h3>
+                <!-- Color Legend -->
+                <div class="color-list" id="colorLegend"></div>
                 <div class="chart-container"><canvas id="actionChart"></canvas></div>
             </div>
             <div class="chart-card">
-                <h3><i class="fas fa-users" style="margin-right:8px;color:#2563eb;"></i>Top 15 Users by Tasks</h3>
+                <h3><i class="fas fa-users" style="margin-right:8px;color:#4F46E5;"></i>Top 15 Users by Tasks</h3>
                 <div class="chart-container"><canvas id="userChart"></canvas></div>
             </div>
             <div class="chart-card full-width">
-                <h3><i class="fas fa-calendar-alt" style="margin-right:8px;color:#2563eb;"></i>Tasks by Date</h3>
+                <h3><i class="fas fa-calendar-alt" style="margin-right:8px;color:#4F46E5;"></i>Tasks by Date</h3>
                 <div class="chart-container"><canvas id="timelineChart"></canvas></div>
             </div>
             <div class="chart-card full-width">
-                <h3><i class="fas fa-layer-group" style="margin-right:8px;color:#2563eb;"></i>Action vs Top Users (stacked)</h3>
+                <h3><i class="fas fa-layer-group" style="margin-right:8px;color:#4F46E5;"></i>Action vs Top Users (stacked)</h3>
                 <div class="chart-container"><canvas id="stackedChart"></canvas></div>
             </div>
         </div>
@@ -711,7 +648,7 @@
     <div id="tableView" style="display:none;">
         <div class="table-wrapper">
             <div class="table-header">
-                <h3><i class="fas fa-list-ul" style="margin-right:8px;color:#2563eb;"></i>All Records</h3>
+                <h3><i class="fas fa-list-ul" style="margin-right:8px;color:#4F46E5;"></i>All Records</h3>
                 <input type="text" id="searchInput" placeholder="🔍 Search by ID, user, action..." />
             </div>
             <div class="table-scroll">
@@ -755,6 +692,52 @@
     let currentView = 'analytics';
     let currentFileName = 'Last_month.CSV.csv';
 
+    // ---------- NEW COLOR PALETTE (DISTINCT, VIBRANT) ----------
+    const COLORS = [
+        '#4F46E5', // Indigo - Primary
+        '#EF4444', // Red
+        '#10B981', // Emerald
+        '#F59E0B', // Amber
+        '#8B5CF6', // Violet
+        '#EC4899', // Pink
+        '#06B6D4', // Cyan
+        '#F97316', // Orange
+        '#14B8A6', // Teal
+        '#6366F1', // Indigo Light
+        '#84CC16', // Lime
+        '#D946EF', // Fuchsia
+        '#0EA5E9', // Sky Blue
+        '#F43F5E', // Rose
+        '#22D3EE', // Light Cyan
+        '#A78BFA', // Light Purple
+        '#34D399', // Light Emerald
+        '#FB923C', // Light Orange
+        '#F472B6', // Light Pink
+        '#60A5FA', // Light Blue
+    ];
+
+    // ---------- GET COLOR FOR ACTION ----------
+    function getColorForAction(action, index) {
+        const colorMap = {
+            'qc_editingtool': '#4F46E5',
+            're-edit': '#EF4444',
+            'Mask Correction': '#10B981',
+            'Photopea Output': '#8B5CF6',
+            'floor removeBG': '#F59E0B',
+            'Window correction': '#06B6D4',
+            'Manual-RemoveBG': '#EC4899',
+            'Remove BG Issue': '#F97316',
+            'Bike_RemoveBG': '#14B8A6',
+            'Add Antenna': '#6366F1',
+            'reprocess': '#84CC16',
+            'Roofrail-RBG': '#D946EF',
+            'commonEditTool': '#0EA5E9',
+            'Open-Door Exterior': '#F43F5E',
+            'Image Resizing (IR)': '#22D3EE',
+        };
+        return colorMap[action] || COLORS[index % COLORS.length];
+    }
+
     // ---------- CSV PARSER ----------
     function parseCSV(text) {
         const lines = text.split('\n').filter(line => line.trim() !== '');
@@ -790,7 +773,7 @@
         return result;
     }
 
-    // ---------- FILE UPLOAD HANDLER ----------
+    // ---------- FILE UPLOAD ----------
     function handleFileUpload() {
         const fileInput = document.getElementById('csvFileInput');
         const status = document.getElementById('uploadStatus');
@@ -801,7 +784,6 @@
             status.textContent = '❌ Please select a CSV file first!';
             return;
         }
-
         if (!file.name.endsWith('.csv')) {
             status.className = 'upload-status error';
             status.textContent = '❌ Please select a valid CSV file!';
@@ -816,9 +798,7 @@
             try {
                 const text = e.target.result;
                 const data = parseCSV(text);
-                if (data.length === 0) {
-                    throw new Error('No data found in CSV');
-                }
+                if (data.length === 0) throw new Error('No data found in CSV');
                 currentFileName = file.name;
                 document.getElementById('currentFile').textContent = file.name;
                 status.className = 'upload-status success';
@@ -849,11 +829,9 @@
         filteredData = [...data];
         document.getElementById('filteredCount').textContent = data.length;
         
-        // Reset views
         galleryPage = 1;
         currentPage = 1;
         
-        // Re-render current view
         if (currentView === 'analytics') renderAnalytics(filteredData);
         else if (currentView === 'gallery') renderGallery(filteredData);
         else if (currentView === 'table') renderTable(filteredData);
@@ -861,7 +839,6 @@
 
     // ---------- POPULATE FILTERS ----------
     function populateFilterOptions(data) {
-        // Users
         const userSet = new Set();
         data.forEach(r => {
             const u = r['User Details - Rejected By User__email_id'] || 'Unknown';
@@ -876,7 +853,6 @@
             userSelect.appendChild(opt);
         });
 
-        // Actions
         const actionSet = new Set();
         data.forEach(r => {
             const a = r['image_action'] || 'Unknown';
@@ -887,543 +863,4 @@
         Array.from(actionSet).sort().forEach(a => {
             const opt = document.createElement('option');
             opt.value = a;
-            opt.textContent = a;
-            actionSelect.appendChild(opt);
-        });
-
-        // Reject Comments
-        const rejectSet = new Set();
-        data.forEach(r => {
-            const comment = r['rejected_comment'] || '';
-            if (comment && comment.trim() !== '') {
-                rejectSet.add(comment.trim());
-            }
-        });
-        const rejectSelect = document.getElementById('rejectFilter');
-        rejectSelect.innerHTML = '<option value="">All Comments</option>';
-        
-        const hasAnyOpt = document.createElement('option');
-        hasAnyOpt.value = '__HAS_ANY__';
-        hasAnyOpt.textContent = '📝 Has Any Comment';
-        rejectSelect.appendChild(hasAnyOpt);
-        
-        const emptyOpt = document.createElement('option');
-        emptyOpt.value = '__EMPTY__';
-        emptyOpt.textContent = '📭 No Comment';
-        rejectSelect.appendChild(emptyOpt);
-        
-        const separator = document.createElement('option');
-        separator.disabled = true;
-        separator.textContent = '──────────';
-        rejectSelect.appendChild(separator);
-        
-        Array.from(rejectSet).sort().forEach(comment => {
-            const opt = document.createElement('option');
-            opt.value = comment;
-            const count = data.filter(r => (r['rejected_comment'] || '').trim() === comment).length;
-            opt.textContent = `${comment} (${count})`;
-            rejectSelect.appendChild(opt);
-        });
-    }
-
-    // ---------- APPLY FILTERS ----------
-    function applyFilters() {
-        if (allData.length === 0) return;
-        const userFilter = document.getElementById('userFilter').value;
-        const actionFilter = document.getElementById('actionFilter').value;
-        const dateFrom = document.getElementById('dateFrom').value;
-        const dateTo = document.getElementById('dateTo').value;
-        const rejectFilter = document.getElementById('rejectFilter').value;
-        const searchTerm = document.getElementById('searchInput')?.value?.toLowerCase() || '';
-
-        filteredData = allData.filter(row => {
-            if (userFilter) {
-                const user = row['User Details - Rejected By User__email_id'] || '';
-                if (user !== userFilter) return false;
-            }
-            if (actionFilter) {
-                const action = row['image_action'] || '';
-                if (action !== actionFilter) return false;
-            }
-            const dateStr = row['created_on'] || '';
-            if (dateFrom || dateTo) {
-                const dateParts = dateStr.split(',');
-                if (dateParts.length >= 2) {
-                    const dayMonth = dateParts[0].trim();
-                    const dateObj = new Date(dayMonth + ', 2026');
-                    if (dateFrom) {
-                        const fromDate = new Date(dateFrom);
-                        if (dateObj < fromDate) return false;
-                    }
-                    if (dateTo) {
-                        const toDate = new Date(dateTo);
-                        toDate.setHours(23, 59, 59);
-                        if (dateObj > toDate) return false;
-                    }
-                } else if (dateFrom || dateTo) {
-                    return false;
-                }
-            }
-            
-            const comment = row['rejected_comment'] || '';
-            const hasComment = comment && comment.trim() !== '';
-            
-            if (rejectFilter === '__HAS_ANY__') {
-                if (!hasComment) return false;
-            } else if (rejectFilter === '__EMPTY__') {
-                if (hasComment) return false;
-            } else if (rejectFilter) {
-                if (comment.trim() !== rejectFilter) return false;
-            }
-
-            if (searchTerm) {
-                const searchable = JSON.stringify(row).toLowerCase();
-                if (!searchable.includes(searchTerm)) return false;
-            }
-            return true;
-        });
-
-        currentPage = 1;
-        galleryPage = 1;
-        document.getElementById('filteredCount').textContent = filteredData.length;
-        document.getElementById('totalCount').textContent = allData.length;
-        
-        if (currentView === 'analytics') renderAnalytics(filteredData);
-        else if (currentView === 'gallery') renderGallery(filteredData);
-        else if (currentView === 'table') renderTable(filteredData);
-    }
-
-    // ---------- CLEAR FILTERS ----------
-    function clearAllFilters() {
-        document.getElementById('userFilter').value = '';
-        document.getElementById('actionFilter').value = '';
-        document.getElementById('dateFrom').value = '';
-        document.getElementById('dateTo').value = '';
-        document.getElementById('rejectFilter').value = '';
-        const searchInput = document.getElementById('searchInput');
-        if (searchInput) searchInput.value = '';
-        filteredData = [...allData];
-        currentPage = 1;
-        galleryPage = 1;
-        document.getElementById('filteredCount').textContent = filteredData.length;
-        document.getElementById('totalCount').textContent = allData.length;
-        
-        if (currentView === 'analytics') renderAnalytics(filteredData);
-        else if (currentView === 'gallery') renderGallery(filteredData);
-        else if (currentView === 'table') renderTable(filteredData);
-    }
-
-    // ---------- SWITCH VIEW ----------
-    function switchView(view) {
-        currentView = view;
-        
-        document.querySelectorAll('.view-toggle button').forEach(btn => btn.classList.remove('active'));
-        if (view === 'analytics') document.getElementById('btnAnalytics').classList.add('active');
-        else if (view === 'gallery') document.getElementById('btnGallery').classList.add('active');
-        else if (view === 'table') document.getElementById('btnTable').classList.add('active');
-        
-        document.getElementById('analyticsView').style.display = view === 'analytics' ? 'block' : 'none';
-        document.getElementById('galleryView').style.display = view === 'gallery' ? 'block' : 'none';
-        document.getElementById('tableView').style.display = view === 'table' ? 'block' : 'none';
-        
-        if (view === 'analytics') renderAnalytics(filteredData);
-        else if (view === 'gallery') renderGallery(filteredData);
-        else if (view === 'table') renderTable(filteredData);
-    }
-
-    // ---------- RENDER ANALYTICS ----------
-    function renderAnalytics(data) {
-        const actionCounts = {};
-        data.forEach(r => {
-            const a = r['image_action'] || 'Unknown';
-            actionCounts[a] = (actionCounts[a] || 0) + 1;
-        });
-        const actionLabels = Object.keys(actionCounts);
-        const actionValues = Object.values(actionCounts);
-        const colors = ['#4f46e5', '#7c3aed', '#2563eb', '#0ea5e9', '#06b6d4', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'];
-        const bgColors = actionLabels.map((_, i) => colors[i % colors.length]);
-
-        if (chartInstances.actionChart) chartInstances.actionChart.destroy();
-        chartInstances.actionChart = new Chart(document.getElementById('actionChart'), {
-            type: 'doughnut',
-            data: {
-                labels: actionLabels,
-                datasets: [{ data: actionValues, backgroundColor: bgColors, borderWidth: 0 }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { 
-                        position: 'right', 
-                        labels: { boxWidth: 12, padding: 10, font: { size: 11 }, maxHeight: 200, usePointStyle: true }
-                    }
-                },
-                cutout: '65%'
-            }
-        });
-
-        const userCounts = {};
-        data.forEach(r => {
-            const u = r['User Details - Rejected By User__email_id'] || 'Unknown';
-            userCounts[u] = (userCounts[u] || 0) + 1;
-        });
-        const sortedUsers = Object.entries(userCounts).sort((a, b) => b[1] - a[1]).slice(0, 15);
-        const userLabels = sortedUsers.map(u => u[0].split('@')[0] || u[0]);
-        const userValues = sortedUsers.map(u => u[1]);
-
-        if (chartInstances.userChart) chartInstances.userChart.destroy();
-        chartInstances.userChart = new Chart(document.getElementById('userChart'), {
-            type: 'bar',
-            data: {
-                labels: userLabels,
-                datasets: [{
-                    label: 'Tasks',
-                    data: userValues,
-                    backgroundColor: '#2563eb',
-                    borderRadius: 4,
-                }]
-            },
-            options: {
-                indexAxis: 'y',
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: {
-                    x: { grid: { display: false }, beginAtZero: true },
-                    y: { grid: { display: false } }
-                }
-            }
-        });
-
-        const dateCounts = {};
-        data.forEach(r => {
-            const d = r['created_on'] || '';
-            const parts = d.split(',');
-            if (parts.length >= 2) {
-                const dayMonth = parts[0].trim();
-                const monthDay = dayMonth.split(' ').reverse().join(' ');
-                dateCounts[monthDay] = (dateCounts[monthDay] || 0) + 1;
-            }
-        });
-        const sortedDates = Object.keys(dateCounts).sort((a, b) => {
-            const da = new Date(a + ', 2026');
-            const db = new Date(b + ', 2026');
-            return da - db;
-        });
-        const timelineData = sortedDates.map(d => dateCounts[d]);
-
-        if (chartInstances.timelineChart) chartInstances.timelineChart.destroy();
-        chartInstances.timelineChart = new Chart(document.getElementById('timelineChart'), {
-            type: 'line',
-            data: {
-                labels: sortedDates,
-                datasets: [{
-                    label: 'Tasks',
-                    data: timelineData,
-                    borderColor: '#2563eb',
-                    backgroundColor: 'rgba(37, 99, 235, 0.08)',
-                    fill: true,
-                    tension: 0.3,
-                    pointRadius: 3,
-                    pointBackgroundColor: '#2563eb',
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: {
-                    x: { grid: { display: false }, ticks: { maxRotation: 30, font: { size: 10 } } },
-                    y: { beginAtZero: true, grid: { color: '#f0f2f5' } }
-                }
-            }
-        });
-
-        const topUsers = sortedUsers.slice(0, 10).map(u => u[0]);
-        const actions = Object.keys(actionCounts).slice(0, 8);
-        const stackedData = actions.map(action => {
-            return {
-                label: action,
-                data: topUsers.map(user => {
-                    return data.filter(r =>
-                        (r['image_action'] || 'Unknown') === action &&
-                        (r['User Details - Rejected By User__email_id'] || 'Unknown') === user
-                    ).length;
-                }),
-                backgroundColor: colors[actions.indexOf(action) % colors.length],
-            };
-        });
-
-        if (chartInstances.stackedChart) chartInstances.stackedChart.destroy();
-        chartInstances.stackedChart = new Chart(document.getElementById('stackedChart'), {
-            type: 'bar',
-            data: {
-                labels: topUsers.map(u => u.split('@')[0] || u),
-                datasets: stackedData,
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { 
-                        position: 'top', 
-                        labels: { boxWidth: 12, font: { size: 10 }, usePointStyle: true }
-                    }
-                },
-                scales: {
-                    x: { stacked: true, grid: { display: false } },
-                    y: { stacked: true, beginAtZero: true, grid: { color: '#f0f2f5' } }
-                }
-            }
-        });
-    }
-
-    // ---------- RENDER GALLERY ----------
-    function renderGallery(data) {
-        const container = document.getElementById('galleryContainer');
-        const empty = document.getElementById('galleryEmpty');
-        const loadMore = document.getElementById('galleryLoadMore');
-        
-        const start = 0;
-        const end = Math.min(galleryItemsPerPage, data.length);
-        const pageData = data.slice(start, end);
-        
-        if (data.length === 0) {
-            container.innerHTML = '';
-            empty.style.display = 'block';
-            loadMore.style.display = 'none';
-            return;
-        }
-        
-        empty.style.display = 'none';
-        
-        if (data.length > galleryItemsPerPage) {
-            loadMore.style.display = 'block';
-        } else {
-            loadMore.style.display = 'none';
-        }
-        
-        container.innerHTML = '';
-        pageData.forEach(row => {
-            const id = row['id'] || row['Id'] || 'N/A';
-            const action = row['image_action'] || '—';
-            const user = row['User Details - Rejected By User__email_id'] || '—';
-            const created = row['created_on'] || '—';
-            const rejectComment = row['rejected_comment'] || '';
-            const inputImage = row['input_image_hres_url'] || '';
-            const outputImage = row['output_image_hres_url'] || '';
-            const manualEdit = row['manual_edited_hres_url'] || '';
-            
-            const card = document.createElement('div');
-            card.className = 'gallery-card';
-            card.innerHTML = `
-                <div class="image-grid">
-                    <div class="img-wrapper">
-                        ${inputImage ? `<img src="${inputImage}" alt="Input" loading="lazy" onerror="this.style.display='none'">` : `<span class="placeholder">No Input<br>Image</span>`}
-                        <span class="label-badge" style="background:rgba(37,99,235,0.8);">Input</span>
-                    </div>
-                    <div class="img-wrapper">
-                        ${outputImage ? `<img src="${outputImage}" alt="Output" loading="lazy" onerror="this.style.display='none'">` : `<span class="placeholder">No Output<br>Image</span>`}
-                        <span class="label-badge" style="background:rgba(16,185,129,0.8);">Output</span>
-                    </div>
-                    <div class="img-wrapper">
-                        ${manualEdit ? `<img src="${manualEdit}" alt="Manual Edit" loading="lazy" onerror="this.style.display='none'">` : `<span class="placeholder">No Manual<br>Edit</span>`}
-                        <span class="label-badge" style="background:rgba(245,158,11,0.8);">Manual</span>
-                    </div>
-                </div>
-                <div class="gallery-info">
-                    <div class="gallery-id">#${id}</div>
-                    <div class="gallery-meta">
-                        <span class="badge-action">${action}</span>
-                        <span class="gallery-user"><i class="fas fa-user"></i> ${user.split('@')[0]}</span>
-                        <span class="gallery-date"><i class="fas fa-calendar"></i> ${created}</span>
-                    </div>
-                    ${rejectComment ? `<div class="gallery-comment"><i class="fas fa-comment"></i> ${rejectComment}</div>` : ''}
-                </div>
-            `;
-            container.appendChild(card);
-        });
-        
-        window._galleryData = data;
-        window._galleryPage = 1;
-    }
-
-    // ---------- LOAD MORE GALLERY ----------
-    function loadMoreGallery() {
-        const data = window._galleryData || [];
-        const page = (window._galleryPage || 1) + 1;
-        const start = (page - 1) * galleryItemsPerPage;
-        const end = Math.min(start + galleryItemsPerPage, data.length);
-        const pageData = data.slice(start, end);
-        
-        if (pageData.length === 0) return;
-        
-        const container = document.getElementById('galleryContainer');
-        pageData.forEach(row => {
-            const id = row['id'] || row['Id'] || 'N/A';
-            const action = row['image_action'] || '—';
-            const user = row['User Details - Rejected By User__email_id'] || '—';
-            const created = row['created_on'] || '—';
-            const rejectComment = row['rejected_comment'] || '';
-            const inputImage = row['input_image_hres_url'] || '';
-            const outputImage = row['output_image_hres_url'] || '';
-            const manualEdit = row['manual_edited_hres_url'] || '';
-            
-            const card = document.createElement('div');
-            card.className = 'gallery-card';
-            card.innerHTML = `
-                <div class="image-grid">
-                    <div class="img-wrapper">
-                        ${inputImage ? `<img src="${inputImage}" alt="Input" loading="lazy" onerror="this.style.display='none'">` : `<span class="placeholder">No Input<br>Image</span>`}
-                        <span class="label-badge" style="background:rgba(37,99,235,0.8);">Input</span>
-                    </div>
-                    <div class="img-wrapper">
-                        ${outputImage ? `<img src="${outputImage}" alt="Output" loading="lazy" onerror="this.style.display='none'">` : `<span class="placeholder">No Output<br>Image</span>`}
-                        <span class="label-badge" style="background:rgba(16,185,129,0.8);">Output</span>
-                    </div>
-                    <div class="img-wrapper">
-                        ${manualEdit ? `<img src="${manualEdit}" alt="Manual Edit" loading="lazy" onerror="this.style.display='none'">` : `<span class="placeholder">No Manual<br>Edit</span>`}
-                        <span class="label-badge" style="background:rgba(245,158,11,0.8);">Manual</span>
-                    </div>
-                </div>
-                <div class="gallery-info">
-                    <div class="gallery-id">#${id}</div>
-                    <div class="gallery-meta">
-                        <span class="badge-action">${action}</span>
-                        <span class="gallery-user"><i class="fas fa-user"></i> ${user.split('@')[0]}</span>
-                        <span class="gallery-date"><i class="fas fa-calendar"></i> ${created}</span>
-                    </div>
-                    ${rejectComment ? `<div class="gallery-comment"><i class="fas fa-comment"></i> ${rejectComment}</div>` : ''}
-                </div>
-            `;
-            container.appendChild(card);
-        });
-        
-        window._galleryPage = page;
-        
-        if (end >= data.length) {
-            document.getElementById('galleryLoadMore').style.display = 'none';
-        }
-    }
-
-    // ---------- RENDER TABLE ----------
-    function renderTable(data = filteredData) {
-        const tbody = document.getElementById('tableBody');
-        const start = (currentPage - 1) * rowsPerPage;
-        const end = Math.min(start + rowsPerPage, data.length);
-        const pageData = data.slice(start, end);
-        
-        tbody.innerHTML = '';
-        pageData.forEach((row, idx) => {
-            const id = row['id'] || row['Id'] || start + idx + 1;
-            const action = row['image_action'] || '—';
-            const user = row['User Details - Rejected By User__email_id'] || '—';
-            const created = row['created_on'] || '—';
-            const rejectComment = row['rejected_comment'] || '';
-            const output = row['output_image_hres_url'] || row['manual_edited_hres_url'] || '';
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td><code style="background:#f1f4f9;padding:2px 6px;border-radius:4px;font-size:12px;">${id}</code></td>
-                <td><span class="badge-action">${action}</span></td>
-                <td>${user}</td>
-                <td class="text-muted">${created}</td>
-                <td><span class="reject-comment" title="${rejectComment}">${rejectComment || '—'}</span></td>
-                <td>${output ? `<a href="${output}" target="_blank"><i class="fas fa-external-link-alt"></i> View</a>` : '—'}</td>
-            `;
-            tbody.appendChild(tr);
-        });
-
-        const total = data.length;
-        const maxPage = Math.ceil(total / rowsPerPage) || 1;
-        document.getElementById('tableInfo').textContent = `Showing ${total > 0 ? start + 1 : 0} - ${end} of ${total}`;
-        document.getElementById('pageInfo').textContent = `Page ${currentPage} of ${maxPage}`;
-        
-        document.getElementById('prevPage').disabled = currentPage <= 1;
-        document.getElementById('nextPage').disabled = currentPage >= maxPage;
-    }
-
-    // ---------- EVENT LISTENERS ----------
-    document.getElementById('searchInput').addEventListener('input', applyFilters);
-
-    document.querySelectorAll('th[data-sort]').forEach(th => {
-        th.addEventListener('click', function() {
-            const key = this.dataset.sort;
-            if (sortKey === key) {
-                sortAsc = !sortAsc;
-            } else {
-                sortKey = key;
-                sortAsc = true;
-            }
-            filteredData.sort((a, b) => {
-                let valA = a[key] || '';
-                let valB = b[key] || '';
-                if (key === 'id') {
-                    valA = parseInt(valA) || 0;
-                    valB = parseInt(valB) || 0;
-                }
-                if (key === 'date') {
-                    valA = new Date(valA) || 0;
-                    valB = new Date(valB) || 0;
-                }
-                if (valA < valB) return sortAsc ? -1 : 1;
-                if (valA > valB) return sortAsc ? 1 : -1;
-                return 0;
-            });
-            currentPage = 1;
-            renderTable(filteredData);
-        });
-    });
-
-    document.getElementById('prevPage').addEventListener('click', () => {
-        if (currentPage > 1) { currentPage--; renderTable(filteredData); }
-    });
-    document.getElementById('nextPage').addEventListener('click', () => {
-        const maxPage = Math.ceil(filteredData.length / rowsPerPage);
-        if (currentPage < maxPage) { currentPage++; renderTable(filteredData); }
-    });
-
-    document.querySelectorAll('#dateFrom, #dateTo').forEach(input => {
-        input.addEventListener('change', applyFilters);
-    });
-
-    document.querySelectorAll('#userFilter, #actionFilter, #rejectFilter').forEach(select => {
-        select.addEventListener('change', applyFilters);
-    });
-
-    // ---------- LOAD DEFAULT CSV ----------
-    function loadDefaultCSV() {
-        document.getElementById('loadingIndicator').style.display = 'block';
-        document.getElementById('loadingIndicator').innerHTML = `
-            <div class="spinner"></div>
-            Loading default data...
-        `;
-        
-        fetch('Last_month.CSV.csv')
-            .then(res => {
-                if (!res.ok) throw new Error('Default CSV not found');
-                return res.text();
-            })
-            .then(text => {
-                const data = parseCSV(text);
-                if (data.length === 0) throw new Error('No data');
-                document.getElementById('currentFile').textContent = 'Last_month.CSV.csv';
-                onDataLoaded(data);
-            })
-            .catch(err => {
-                document.getElementById('loadingIndicator').innerHTML = `
-                    <div style="color:#6b7a93;padding:40px;">
-                        <i class="fas fa-cloud-upload-alt" style="font-size:48px;display:block;margin-bottom:16px;color:#2563eb;"></i>
-                        <p style="font-size:16px;margin-bottom:8px;">No default CSV found</p>
-                        <p style="font-size:13px;">Please upload a CSV file using the upload button above.</p>
-                    </div>
-                `;
-                console.log('No default CSV, waiting for upload');
-            });
-    }
-
-    // Start the app
-    loadDefaultCSV();
-</script>
-</body>
-</html>
+           
