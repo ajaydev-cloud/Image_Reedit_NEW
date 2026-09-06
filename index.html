@@ -1,1 +1,112 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Image Re-edit Dashboard</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- PapaParse for reading CSV -->
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+</head>
+
+<body>
+
+    <!-- Header -->
+    <header>
+        <h1>📊 Image Re-edit Dashboard</h1>
+        <p>CSV Data Analytics Dashboard</p>
+    </header>
+
+
+    <!-- Dashboard Cards -->
+    <div class="dashboard-container">
+
+        <div class="card">
+            <h3>Total Records</h3>
+            <h2 id="totalRecords">0</h2>
+        </div>
+
+        <div class="card">
+            <h3>Re-edit</h3>
+            <h2 id="reeditCount">0</h2>
+        </div>
+
+        <div class="card">
+            <h3>QC Editing Tool</h3>
+            <h2 id="qcCount">0</h2>
+        </div>
+
+        <div class="card">
+            <h3>Total Users</h3>
+            <h2 id="totalUsers">0</h2>
+        </div>
+
+    </div>
+
+
+    <!-- Charts -->
+    <div class="charts-container">
+
+        <div class="chart-box">
+            <h2>Image Action Distribution</h2>
+            <canvas id="actionChart"></canvas>
+        </div>
+
+        <div class="chart-box">
+            <h2>Daily Activity</h2>
+            <canvas id="dailyChart"></canvas>
+        </div>
+
+    </div>
+
+
+    <!-- Data Table -->
+    <div class="table-container">
+
+        <h2>📋 Data Records</h2>
+
+        <input
+            type="text"
+            id="searchInput"
+            placeholder="Search by Image ID, SKU, User..."
+        >
+
+        <div class="table-wrapper">
+
+            <table id="dataTable">
+
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Image ID</th>
+                        <th>SKU ID</th>
+                        <th>Action</th>
+                        <th>Created On</th>
+                        <th>User</th>
+                    </tr>
+                </thead>
+
+                <tbody id="tableBody">
+                    <!-- CSV Data will appear here -->
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+
+    <script src="script.js"></script>
+
+</body>
+</html>
+```
 
