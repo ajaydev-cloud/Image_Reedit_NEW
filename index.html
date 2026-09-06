@@ -171,48 +171,6 @@
             color: #dc2626;
         }
 
-        /* ---------- CARDS ---------- */
-        .cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 28px;
-        }
-        .card {
-            background: #ffffff;
-            border-radius: 16px;
-            padding: 20px 18px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-            border: 1px solid #eef2f6;
-            transition: transform 0.15s ease;
-        }
-        .card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
-        }
-        .card .label {
-            font-size: 13px;
-            font-weight: 500;
-            color: #5b677b;
-            letter-spacing: 0.3px;
-            text-transform: uppercase;
-        }
-        .card .value {
-            font-size: 32px;
-            font-weight: 600;
-            margin-top: 6px;
-        }
-        .card .sub {
-            font-size: 13px;
-            color: #5b677b;
-            margin-top: 4px;
-        }
-        .card .icon {
-            float: right;
-            font-size: 28px;
-            opacity: 0.3;
-        }
-
         /* ---------- CHART GRID ---------- */
         .charts-grid {
             display: grid;
@@ -396,9 +354,6 @@
                 align-items: flex-start;
                 gap: 12px;
             }
-            .cards {
-                grid-template-columns: 1fr 1fr;
-            }
             .filters-grid {
                 grid-template-columns: 1fr;
             }
@@ -479,34 +434,6 @@
         </div>
         <div class="filter-stats" id="filterStats">
             Showing <strong id="filteredCount">0</strong> of <strong id="totalCount">0</strong> records
-        </div>
-    </div>
-
-    <!-- CARDS -->
-    <div class="cards" id="cards" style="display:none;">
-        <div class="card">
-            <i class="fas fa-tasks icon"></i>
-            <div class="label">Total Tasks</div>
-            <div class="value" id="totalTasks">0</div>
-            <div class="sub">entries</div>
-        </div>
-        <div class="card">
-            <i class="fas fa-users icon"></i>
-            <div class="label">Unique Users</div>
-            <div class="value" id="uniqueUsers">0</div>
-            <div class="sub">contributors</div>
-        </div>
-        <div class="card">
-            <i class="fas fa-star icon"></i>
-            <div class="label">Top Action</div>
-            <div class="value" id="topAction">—</div>
-            <div class="sub">most frequent</div>
-        </div>
-        <div class="card">
-            <i class="fas fa-tag icon"></i>
-            <div class="label">Action Types</div>
-            <div class="value" id="actionCount">0</div>
-            <div class="sub">unique actions</div>
         </div>
     </div>
 
@@ -667,7 +594,6 @@
 
             document.getElementById('loadingIndicator').style.display = 'none';
             document.getElementById('filtersSection').style.display = 'block';
-            document.getElementById('cards').style.display = 'grid';
             document.getElementById('chartsContainer').style.display = 'block';
             document.getElementById('tableWrapper').style.display = 'block';
 
@@ -731,7 +657,7 @@
                 actionSelect.appendChild(opt);
             });
 
-            // ---------- REJECT COMMENT DROPDOWN (NEW) ----------
+            // Reject Comment dropdown
             const rejectSet = new Set();
             data.forEach(r => {
                 const comment = r['rejected_comment'] || '';
@@ -742,29 +668,24 @@
             const rejectSelect = document.getElementById('rejectFilter');
             rejectSelect.innerHTML = '<option value="">All Comments</option>';
             
-            // Add "Has Any Comment" option
             const hasAnyOpt = document.createElement('option');
             hasAnyOpt.value = '__HAS_ANY__';
             hasAnyOpt.textContent = '📝 Has Any Comment';
             rejectSelect.appendChild(hasAnyOpt);
             
-            // Add "Empty Comment" option
             const emptyOpt = document.createElement('option');
             emptyOpt.value = '__EMPTY__';
             emptyOpt.textContent = '📭 No Comment';
             rejectSelect.appendChild(emptyOpt);
             
-            // Add separator
             const separator = document.createElement('option');
             separator.disabled = true;
             separator.textContent = '──────────';
             rejectSelect.appendChild(separator);
             
-            // Add all unique comments
             Array.from(rejectSet).sort().forEach(comment => {
                 const opt = document.createElement('option');
                 opt.value = comment;
-                // Count occurrences
                 const count = data.filter(r => (r['rejected_comment'] || '').trim() === comment).length;
                 opt.textContent = `${comment} (${count})`;
                 rejectSelect.appendChild(opt);
@@ -810,7 +731,6 @@
                     }
                 }
                 
-                // ---------- REJECT COMMENT FILTER (UPDATED) ----------
                 const comment = row['rejected_comment'] || '';
                 const hasComment = comment && comment.trim() !== '';
                 
@@ -819,10 +739,8 @@
                 } else if (rejectFilter === '__EMPTY__') {
                     if (hasComment) return false;
                 } else if (rejectFilter) {
-                    // Exact match on comment
                     if (comment.trim() !== rejectFilter) return false;
                 }
-                // If rejectFilter is empty string, show all
 
                 if (searchTerm) {
                     const searchable = JSON.stringify(row).toLowerCase();
@@ -857,21 +775,12 @@
             document.getElementById('filteredCount').textContent = data.length;
             document.getElementById('totalCount').textContent = allData.length;
 
-            const total = data.length;
-            const users = [...new Set(data.map(r => r['User Details - Rejected By User__email_id'] || 'Unknown'))];
+            // ----- CHART: action distribution -----
             const actionCounts = {};
             data.forEach(r => {
                 const a = r['image_action'] || 'Unknown';
                 actionCounts[a] = (actionCounts[a] || 0) + 1;
             });
-            const topAction = Object.entries(actionCounts).sort((a, b) => b[1] - a[1])[0] || ['—', 0];
-
-            document.getElementById('totalTasks').textContent = total;
-            document.getElementById('uniqueUsers').textContent = users.length;
-            document.getElementById('topAction').textContent = topAction[0];
-            document.getElementById('actionCount').textContent = Object.keys(actionCounts).length;
-
-            // ----- CHART: action distribution -----
             const actionLabels = Object.keys(actionCounts);
             const actionValues = Object.values(actionCounts);
             const colors = ['#4f46e5', '#7c3aed', '#2563eb', '#0ea5e9', '#06b6d4', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'];
