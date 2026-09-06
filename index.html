@@ -1,369 +1,348 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image Review Data · Spyne</title>
-    <style>
-        * {
-            box-sizing: border-box;
-        }
-        body {
-            background: #f6f8fc;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            margin: 0;
-            padding: 24px;
-            color: #1e293b;
-        }
-        .container {
-            max-width: 1600px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 24px;
-            box-shadow: 0 12px 30px rgba(0,0,0,0.06);
-            overflow: hidden;
-            padding: 20px 20px 28px;
-        }
-        h1 {
-            font-weight: 600;
-            font-size: 1.6rem;
-            margin: 0 0 6px 0;
-            letter-spacing: -0.02em;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-        .subhead {
-            color: #475569;
-            font-size: 0.95rem;
-            margin: 0 0 20px 0;
-            border-left: 4px solid #3b82f6;
-            padding-left: 16px;
-            background: #f8fafc;
-            border-radius: 0 12px 12px 0;
-            line-height: 1.5;
-        }
-        .toolbar {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
-            align-items: center;
-            gap: 16px;
-            margin: 16px 0 20px 0;
-        }
-        .search-wrapper {
-            flex: 1 1 280px;
-            display: flex;
-            align-items: center;
-            background: white;
-            border: 1px solid #e2e8f0;
-            border-radius: 60px;
-            padding: 0 16px;
-            transition: 0.2s;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
-        }
-        .search-wrapper:focus-within {
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
-        }
-        .search-wrapper input {
-            border: none;
-            padding: 12px 12px 12px 6px;
-            font-size: 0.95rem;
-            width: 100%;
-            background: transparent;
-            outline: none;
-            color: #0f172a;
-        }
-        .search-wrapper svg {
-            opacity: 0.5;
-            flex-shrink: 0;
-        }
-        .stats {
-            font-size: 0.9rem;
-            background: #f1f5f9;
-            padding: 6px 16px;
-            border-radius: 40px;
-            white-space: nowrap;
-            color: #1e293b;
-        }
-        .table-wrap {
-            overflow-x: auto;
-            border-radius: 16px;
-            border: 1px solid #e9edf4;
-            background: white;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.85rem;
-            min-width: 1200px;
-        }
-        th {
-            background: #f8fafc;
-            text-align: left;
-            padding: 14px 12px;
-            font-weight: 600;
-            color: #1e293b;
-            border-bottom: 2px solid #e2e8f0;
-            position: sticky;
-            top: 0;
-            z-index: 5;
-            white-space: nowrap;
-        }
-        td {
-            padding: 12px;
-            border-bottom: 1px solid #edf2f7;
-            vertical-align: middle;
-            word-break: break-word;
-        }
-        tr:hover td {
-            background: #fafbff;
-        }
-        .badge {
-            display: inline-block;
-            background: #eef2ff;
-            color: #1e40af;
-            font-size: 0.7rem;
-            font-weight: 500;
-            padding: 2px 10px;
-            border-radius: 40px;
-            letter-spacing: 0.01em;
-        }
-        .link {
-            color: #2563eb;
-            text-decoration: none;
-            border-bottom: 1px dotted #b9d0fa;
-        }
-        .link:hover {
-            border-bottom: 1px solid #2563eb;
-        }
-        .ellipsis {
-            max-width: 220px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            display: inline-block;
-            vertical-align: middle;
-        }
-        .user-email {
-            font-family: 'SF Mono', 'Menlo', monospace;
-            font-size: 0.75rem;
-            background: #f1f5f9;
-            padding: 2px 8px;
-            border-radius: 30px;
-            color: #0f172a;
-        }
-        .enterprise {
-            font-weight: 500;
-        }
-        .empty {
-            color: #94a3b8;
-            font-style: italic;
-            font-size: 0.8rem;
-        }
-        .col-id { min-width: 90px; }
-        .col-enterprise { min-width: 160px; }
-        .col-user { min-width: 140px; }
-        .col-image { min-width: 70px; }
-        .col-reason { min-width: 120px; }
-        .col-date { min-width: 130px; }
-
-        .no-results {
-            padding: 40px 20px;
-            text-align: center;
-            color: #64748b;
-        }
-        @media (max-width: 700px) {
-            body { padding: 12px; }
-            .container { padding: 14px; }
-            h1 { font-size: 1.3rem; }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image Gallery · Spyne</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+    }
+    body {
+      background: #f4f7fc;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      padding: 24px;
+      color: #0b1a33;
+    }
+    .app {
+      max-width: 1440px;
+      margin: 0 auto;
+    }
+    header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    header h1 {
+      font-weight: 600;
+      font-size: 1.8rem;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .filter-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px 20px;
+      background: white;
+      padding: 16px 20px;
+      border-radius: 60px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+      border: 1px solid #e9edf4;
+      align-items: center;
+    }
+    .filter-group {
+      display: flex;
+      align-items: center;
+      gap: 6px 12px;
+      flex-wrap: wrap;
+    }
+    .filter-group label {
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: #2c3e5c;
+      letter-spacing: 0.02em;
+    }
+    .filter-group select, .filter-group input {
+      padding: 8px 14px;
+      border-radius: 40px;
+      border: 1px solid #dce2ec;
+      background: white;
+      font-size: 0.9rem;
+      outline: none;
+      min-width: 140px;
+      transition: 0.2s;
+    }
+    .filter-group select:focus, .filter-group input:focus {
+      border-color: #2a7de1;
+      box-shadow: 0 0 0 3px rgba(42,125,225,0.12);
+    }
+    .filter-group input {
+      min-width: 180px;
+    }
+    .stats {
+      font-size: 0.9rem;
+      color: #2c3e5c;
+      background: #f0f4fa;
+      padding: 4px 18px;
+      border-radius: 40px;
+      white-space: nowrap;
+    }
+    /* gallery grid */
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+    .card {
+      background: white;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.03);
+      border: 1px solid #eef2f8;
+      transition: 0.2s ease;
+      display: flex;
+      flex-direction: column;
+    }
+    .card:hover {
+      box-shadow: 0 12px 28px rgba(0, 20, 50, 0.08);
+      transform: translateY(-2px);
+    }
+    .card-image {
+      background: #f0f4fa;
+      height: 180px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      border-bottom: 1px solid #eef2f8;
+    }
+    .card-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: 0.3s;
+    }
+    .card-image .no-img {
+      color: #869ab8;
+      font-size: 0.85rem;
+      background: #e9eef6;
+      padding: 8px 16px;
+      border-radius: 40px;
+    }
+    .card-body {
+      padding: 14px 16px 16px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .card-id {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: #6f8ab1;
+      letter-spacing: 0.03em;
+    }
+    .card-enterprise {
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: #0b1a33;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .card-enterprise .badge {
+      background: #eef3fc;
+      font-size: 0.6rem;
+      font-weight: 500;
+      padding: 2px 10px;
+      border-radius: 40px;
+      color: #1f4977;
+    }
+    .card-user {
+      font-size: 0.8rem;
+      color: #2c4a73;
+      background: #f5f8fe;
+      padding: 4px 12px;
+      border-radius: 40px;
+      display: inline-block;
+      align-self: flex-start;
+      margin-top: 4px;
+    }
+    .card-user .empty {
+      color: #9aafcc;
+      font-style: italic;
+    }
+    .card-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 8px;
+      font-size: 0.75rem;
+      color: #5f7b9e;
+      border-top: 1px solid #ecf1f8;
+      padding-top: 10px;
+    }
+    .card-meta .reason {
+      background: #eef3fc;
+      padding: 2px 12px;
+      border-radius: 40px;
+      color: #1f4977;
+      font-weight: 500;
+    }
+    .no-results {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 60px 20px;
+      color: #6a84a8;
+      background: white;
+      border-radius: 40px;
+      border: 1px dashed #d0dcee;
+    }
+    @media (max-width: 700px) {
+      .filter-bar { border-radius: 24px; flex-direction: column; align-items: stretch; }
+      .filter-group { flex-wrap: wrap; }
+      header h1 { font-size: 1.4rem; }
+      body { padding: 16px; }
+    }
+  </style>
 </head>
 <body>
-<div class="container">
-    <h1>
-        <span>📸 Review queue</span>
-        <span style="font-size:0.9rem; font-weight:400; color:#475569; margin-left:auto;">re‑edit tasks</span>
-    </h1>
-    <div class="subhead">
-        <strong>Enterprise &amp; user details</strong> — each row shows <code>enterprise_name</code>, <code>ir.enterprise_id</code> and <code>rejected_by_user_email</code> (when available).
-    </div>
+<div class="app">
+  <header>
+    <h1>🖼️ Image review · gallery</h1>
+    <div class="stats" id="statsDisplay">0 items</div>
+  </header>
 
-    <div class="toolbar">
-        <div class="search-wrapper">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            <input type="text" id="searchInput" placeholder="Filter by enterprise, user, ID, reason …" autocomplete="off">
-        </div>
-        <div class="stats" id="statsDisplay">0 records</div>
+  <div class="filter-bar">
+    <div class="filter-group">
+      <label for="enterpriseFilter">🏢 Enterprise</label>
+      <select id="enterpriseFilter"><option value="">All</option></select>
     </div>
+    <div class="filter-group">
+      <label for="userFilter">👤 User</label>
+      <select id="userFilter"><option value="">All</option></select>
+    </div>
+    <div class="filter-group">
+      <label for="searchFilter">🔍 Search</label>
+      <input type="text" id="searchFilter" placeholder="ID, reason, …" />
+    </div>
+  </div>
 
-    <div class="table-wrap">
-        <table>
-            <thead>
-                <tr>
-                    <th class="col-id">ID</th>
-                    <th class="col-enterprise">Enterprise</th>
-                    <th class="col-enterprise">Enterprise ID</th>
-                    <th class="col-user">User (email)</th>
-                    <th class="col-reason">Reject reason</th>
-                    <th class="col-date">Created</th>
-                    <th class="col-image">Action</th>
-                </tr>
-            </thead>
-            <tbody id="tableBody">
-                <!-- rows injected by JS -->
-            </tbody>
-        </table>
-    </div>
-    <div style="margin-top: 16px; font-size:0.8rem; color:#64748b; display:flex; gap:20px; flex-wrap:wrap;">
-        <span>✅ <strong>Enterprise &amp; user fields present</strong> – missing values shown as <span class="empty">empty</span></span>
-        <span>⚡ <span id="visibleCount">0</span> visible rows</span>
-    </div>
+  <div class="gallery" id="galleryContainer"></div>
 </div>
 
 <script>
-    (function() {
-        // ----- raw CSV data (embedded) -----
-        const rawRows = [
-            // (first 10 rows for brevity, full data follows)
-            { id: "24,336,048", enterprise_id: "28733e36c", enterprise_name: "Data Annotation", rejected_by_user_email: "mohit.kumar@spyne.co.in", rejected_comment: "Remove BG Issue", created_on: "31 Aug, 2026, 13:10" },
-            { id: "24,336,049", enterprise_id: "28733e36c", enterprise_name: "Data Annotation", rejected_by_user_email: "mohit.kumar@spyne.co.in", rejected_comment: "Remove BG Issue", created_on: "31 Aug, 2026, 13:10" },
-            { id: "24,336,050", enterprise_id: "28733e36c", enterprise_name: "Data Annotation", rejected_by_user_email: "mohit.kumar@spyne.co.in", rejected_comment: "Remove BG Issue", created_on: "31 Aug, 2026, 13:10" },
-            { id: "24,336,051", enterprise_id: "28733e36c", enterprise_name: "Data Annotation", rejected_by_user_email: "mohit.kumar@spyne.co.in", rejected_comment: "Remove BG Issue", created_on: "31 Aug, 2026, 13:10" },
-            { id: "24,336,052", enterprise_id: "28733e36c", enterprise_name: "Data Annotation", rejected_by_user_email: "mohit.kumar@spyne.co.in", rejected_comment: "Remove BG Issue", created_on: "31 Aug, 2026, 13:10" },
-            { id: "24,336,053", enterprise_id: "28733e36c", enterprise_name: "Data Annotation", rejected_by_user_email: "mohit.kumar@spyne.co.in", rejected_comment: "Remove BG Issue", created_on: "31 Aug, 2026, 13:10" },
-            { id: "24,336,054", enterprise_id: "28733e36c", enterprise_name: "Data Annotation", rejected_by_user_email: "mohit.kumar@spyne.co.in", rejected_comment: "Remove BG Issue", created_on: "31 Aug, 2026, 13:10" },
-            { id: "24,336,055", enterprise_id: "28733e36c", enterprise_name: "Data Annotation", rejected_by_user_email: "mohit.kumar@spyne.co.in", rejected_comment: "Remove BG Issue", created_on: "31 Aug, 2026, 13:10" },
-            { id: "24,336,056", enterprise_id: "28733e36c", enterprise_name: "Data Annotation", rejected_by_user_email: "mohit.kumar@spyne.co.in", rejected_comment: "Remove BG Issue", created_on: "31 Aug, 2026, 13:10" },
-            { id: "24,336,057", enterprise_id: "28733e36c", enterprise_name: "Data Annotation", rejected_by_user_email: "mohit.kumar@spyne.co.in", rejected_comment: "Remove BG Issue", created_on: "31 Aug, 2026, 13:10" },
-            { id: "24,384,940", enterprise_id: "87b2e0c86", enterprise_name: "Auto Park Chrysler Dodge Jeep Ram", rejected_by_user_email: "tejas.kumar@spyne.co.in", rejected_comment: "Remove BG - Trunk", created_on: "2 Sep, 2026, 00:27" },
-            { id: "24,392,243", enterprise_id: "3d5f779d7", enterprise_name: "Rick Weaver Chevrolet", rejected_by_user_email: "shabnam.sheikh@spyne.co.in", rejected_comment: "Floor Extension", created_on: "2 Sep, 2026, 05:00" },
-            { id: "24,393,827", enterprise_id: "f2c1c3e12", enterprise_name: "Jim Schmidt Automotive", rejected_by_user_email: "vikas.gupta@spyne.co.in", rejected_comment: "Remove BG - Trunk", created_on: "2 Sep, 2026, 05:53" },
-            { id: "24,393,941", enterprise_id: "00d2aafe9", enterprise_name: "IM Marketplace GmBH", rejected_by_user_email: "bhanu.solanki@spyne.co.in", rejected_comment: "Remove BG - Tyre", created_on: "2 Sep, 2026, 05:57" },
-            { id: "24,394,004", enterprise_id: "f2c1c3e12", enterprise_name: "Jim Schmidt Automotive", rejected_by_user_email: "vikas.gupta@spyne.co.in", rejected_comment: "Remove BG - Trunk", created_on: "2 Sep, 2026, 05:59" },
-            { id: "24,394,209", enterprise_id: "cd4fb95bc", enterprise_name: "S&L Motors, Pulaski WI", rejected_by_user_email: "kavi.singh@spyne.co.in", rejected_comment: "Seethrough - Trunk", created_on: "2 Sep, 2026, 06:04" },
-            { id: "24,394,578", enterprise_id: "00e6652a1", enterprise_name: "Rohrich Automotive Group", rejected_by_user_email: "kavi.singh@spyne.co.in", rejected_comment: "Seethrough - Trunk", created_on: "2 Sep, 2026, 06:14" },
-            { id: "24,394,713", enterprise_id: "00e6652a1", enterprise_name: "Rohrich Automotive Group", rejected_by_user_email: "kavi.singh@spyne.co.in", rejected_comment: "Seethrough - Trunk", created_on: "2 Sep, 2026, 06:18" },
-            { id: "24,395,970", enterprise_id: "d94a891e5", enterprise_name: "Simmons-Rockwell Automotive Dealerships", rejected_by_user_email: "kavi.singh@spyne.co.in", rejected_comment: "Focus shot-Shadow", created_on: "2 Sep, 2026, 06:55" },
-            { id: "24,396,128", enterprise_id: "7f17a5f34", enterprise_name: "Kayser Chevrolet", rejected_by_user_email: "dinesh.mishra@spyne.co.in", rejected_comment: "Remove BG - Tyre", created_on: "2 Sep, 2026, 07:01" },
-            { id: "24,396,439", enterprise_id: "88944f333", enterprise_name: "Blasius Kia", rejected_by_user_email: "kavi.singh@spyne.co.in", rejected_comment: "Focus Shot - See Through", created_on: "2 Sep, 2026, 07:12" },
-            { id: "24,396,637", enterprise_id: "21de286e9", enterprise_name: "Paragon Motors of Woodside Inc dba Paragon Honda", rejected_by_user_email: "kavi.singh@spyne.co.in", rejected_comment: "Focus Shot - See Through", created_on: "2 Sep, 2026, 07:21" },
-            { id: "24,396,660", enterprise_id: "90410e297", enterprise_name: "Ryan Buick GMC Cadillac", rejected_by_user_email: "pradeep.singh@spyne.co.in", rejected_comment: "Seethrough - Trunk", created_on: "2 Sep, 2026, 07:22" },
-            { id: "24,397,089", enterprise_id: "b047d91bc", enterprise_name: "Bob Allen Ford- Ottawa", rejected_by_user_email: "rahul.ranjan@spyne.co.in", rejected_comment: "Seethrough - Trunk", created_on: "2 Sep, 2026, 07:37" },
-            { id: "24,407,543", enterprise_id: "bb63009cf", enterprise_name: "Apex Automotive Group", rejected_by_user_email: "bashishth.singh@spyne.co.in", rejected_comment: "Remove BG - Tyre", created_on: "2 Sep, 2026, 17:30" },
-            { id: "24,410,231", enterprise_id: "6460d434f", enterprise_name: "Speedway Car Sales", rejected_by_user_email: "shailender.singh@spyne.co.in", rejected_comment: "360int", created_on: "2 Sep, 2026, 19:28" },
-            { id: "24,410,263", enterprise_id: "6460d434f", enterprise_name: "Speedway Car Sales", rejected_by_user_email: "shailender.singh@spyne.co.in", rejected_comment: "360int", created_on: "2 Sep, 2026, 19:29" },
-            { id: "24,410,604", enterprise_id: "9d7892a1e", enterprise_name: "Auto Gallery Automotive Group", rejected_by_user_email: "bashishth.singh@spyne.co.in", rejected_comment: "Remove BG - Trunk", created_on: "2 Sep, 2026, 19:39" },
-            { id: "24,411,005", enterprise_id: "2e0d94823", enterprise_name: "Silsbee Ford", rejected_by_user_email: "shailender.singh@spyne.co.in", rejected_comment: "Focus Shot - See Through", created_on: "2 Sep, 2026, 19:53" },
-            { id: "24,411,006", enterprise_id: "2e0d94823", enterprise_name: "Silsbee Ford", rejected_by_user_email: "shailender.singh@spyne.co.in", rejected_comment: "Focus Shot - See Through", created_on: "2 Sep, 2026, 19:53" },
-            { id: "24,411,007", enterprise_id: "2e0d94823", enterprise_name: "Silsbee Ford", rejected_by_user_email: "shailender.singh@spyne.co.in", rejected_comment: "Remove BG - Tyre", created_on: "2 Sep, 2026, 19:53" },
-            { id: "24,411,114", enterprise_id: "2e0d94823", enterprise_name: "Silsbee Ford", rejected_by_user_email: "shailender.singh@spyne.co.in", rejected_comment: "Remove BG - Tyre", created_on: "2 Sep, 2026, 19:55" },
-            { id: "24,414,476", enterprise_id: "5f357c460", enterprise_name: "KAR Auto Group", rejected_by_user_email: "sneha.swami@spyne.co.in", rejected_comment: "Remove BG - Tyre", created_on: "2 Sep, 2026, 21:33" },
-            { id: "24,414,521", enterprise_id: "5f357c460", enterprise_name: "KAR Auto Group", rejected_by_user_email: "sneha.swami@spyne.co.in", rejected_comment: "Remove BG - Trunk", created_on: "2 Sep, 2026, 21:34" },
-            { id: "24,414,623", enterprise_id: "5f357c460", enterprise_name: "KAR Auto Group", rejected_by_user_email: "mukul.ray@spyne.co.in", rejected_comment: "Remove BG - Tyre", created_on: "2 Sep, 2026, 21:37" },
-            { id: "24,415,027", enterprise_id: "5f357c460", enterprise_name: "KAR Auto Group", rejected_by_user_email: "meena.kumari@spyne.co.in", rejected_comment: "Seethrough - Trunk", created_on: "2 Sep, 2026, 21:42" },
-            { id: "24,415,646", enterprise_id: "5f357c460", enterprise_name: "KAR Auto Group", rejected_by_user_email: "ankesh.raj@spyne.co.in", rejected_comment: "Seethrough - Trunk", created_on: "2 Sep, 2026, 21:54" },
-            { id: "24,418,098", enterprise_id: "1291a4fc6", enterprise_name: "Dorsett Automotive", rejected_by_user_email: "sahil.malik@spyne.co.in", rejected_comment: "Seethrough - Trunk", created_on: "2 Sep, 2026, 22:36" },
-            { id: "24,418,387", enterprise_id: "fb057bb7a", enterprise_name: "Van Mossel", rejected_by_user_email: "devmani.pandey@spyne.co.in", rejected_comment: "Seethrough - Trunk", created_on: "2 Sep, 2026, 22:43" },
-            { id: "24,418,497", enterprise_id: "cd4fb95bc", enterprise_name: "S&L Motors, Pulaski WI", rejected_by_user_email: "sahil.malik@spyne.co.in", rejected_comment: "See through interior", created_on: "2 Sep, 2026, 22:45" },
-            { id: "24,418,518", enterprise_id: "1291a4fc6", enterprise_name: "Dorsett Automotive", rejected_by_user_email: "sahil.malik@spyne.co.in", rejected_comment: "Seethrough - Trunk", created_on: "2 Sep, 2026, 22:45" },
-            { id: "24,418,571", enterprise_id: "87b2e0c86", enterprise_name: "Auto Park Chrysler Dodge Jeep Ram", rejected_by_user_email: "mukesh.kholi@spyne.co.in", rejected_comment: "Focus shot-Shadow", created_on: "2 Sep, 2026, 22:47" },
-            { id: "24,418,929", enterprise_id: "6460d434f", enterprise_name: "Speedway Car Sales", rejected_by_user_email: "shailender.singh@spyne.co.in", rejected_comment: "360int", created_on: "2 Sep, 2026, 22:53" },
-            { id: "24,419,043", enterprise_id: "4a9553ec1", enterprise_name: "Autos of Forney", rejected_by_user_email: "mukesh.kholi@spyne.co.in", rejected_comment: "Focus Shot - See Through", created_on: "2 Sep, 2026, 22:55" },
-            { id: "24,419,218", enterprise_id: "68fe4f5eb", enterprise_name: "Flexcar", rejected_by_user_email: "shailender.singh@spyne.co.in", rejected_comment: "Remove BG - Trunk", created_on: "2 Sep, 2026, 22:57" },
-            { id: "24,419,226", enterprise_id: "68fe4f5eb", enterprise_name: "Flexcar", rejected_by_user_email: "shailender.singh@spyne.co.in", rejected_comment: "360int", created_on: "2 Sep, 2026, 22:57" },
-            { id: "24,419,791", enterprise_id: "5f357c460", enterprise_name: "KAR Auto Group", rejected_by_user_email: "sandeep.singh@spyne.co.in", rejected_comment: "Seethrough - Trunk", created_on: "2 Sep, 2026, 23:07" },
-            { id: "24,420,144", enterprise_id: "55236c531", enterprise_name: "MAG CHRYSLER DODGE JEEP RAM", rejected_by_user_email: "shailender.singh@spyne.co.in", rejected_comment: "Seethrough - Trunk", created_on: "2 Sep, 2026, 23:14" },
-            { id: "24,420,274", enterprise_id: "5f357c460", enterprise_name: "KAR Auto Group", rejected_by_user_email: "sandeep.singh@spyne.co.in", rejected_comment: "Remove BG - Trunk", created_on: "2 Sep, 2026, 23:17" },
-            { id: "24,420,275", enterprise_id: "5f357c460", enterprise_name: "KAR Auto Group", rejected_by_user_email: "sandeep.singh@spyne.co.in", rejected_comment: "Shadow - Tyre", created_on: "2 Sep, 2026, 23:17" },
-            { id: "24,420,277", enterprise_id: "5f357c460", enterprise_name: "KAR Auto Group", rejected_by_user_email: "sandeep.singh@spyne.co.in", rejected_comment: "Shadow - Tyre", created_on: "2 Sep, 2026, 23:17" },
-            { id: "24,420,340", enterprise_id: "10068fb52", enterprise_name: "Kia Vancouver", rejected_by_user_email: "sneha.swami@spyne.co.in", rejected_comment: "Seethrough - Trunk", created_on: "2 Sep, 2026, 23:17" },
-            { id: "24,420,438", enterprise_id: "cdca96e86", enterprise_name: "AutoGiant USA", rejected_by_user_email: "dinesh.mishra@spyne.co.in", rejected_comment: "Remove BG - Open Door", created_on: "2 Sep, 2026, 23:20" },
-            { id: "24,420,714", enterprise_id: "5f357c460", enterprise_name: "KAR Auto Group", rejected_by_user_email: "sandeep.singh@spyne.co.in", rejected_comment: "Seethrough - Trunk", created_on: "2 Sep, 2026, 23:27" },
-            { id: "24,420,804", enterprise_id: "4ba5a48e3", enterprise_name: "Duffys Auto", rejected_by_user_email: "samir.ansari@spyne.co.in", rejected_comment: "Remove BG - Open Door", created_on: "2 Sep, 2026, 23:29" }
-        ];
+  (function() {
+    // ----- sample data (rich, includes image urls from CSV) -----
+    const records = [
+      { id: "24,336,048", enterprise: "Data Annotation", enterpriseId: "28733e36c", user: "mohit.kumar@spyne.co.in", reason: "Remove BG Issue", date: "31 Aug, 2026, 13:10", img: "https://spyne-test.s3.us-east-1.amazonaws.com/ca270e1a-81b1-4f8d-9a3d-04738f7af0ae_test/main_94/sub_09/img-e03c0049-42c9-4108-bce0-412e39d693bc.jpg" },
+      { id: "24,336,049", enterprise: "Data Annotation", enterpriseId: "28733e36c", user: "mohit.kumar@spyne.co.in", reason: "Remove BG Issue", date: "31 Aug, 2026, 13:10", img: "https://spyne-test.s3.us-east-1.amazonaws.com/ca270e1a-81b1-4f8d-9a3d-04738f7af0ae_test/main_94/sub_09/img-e042c88faea548ea92c92bfee25b3ee3.jpg" },
+      { id: "24,384,940", enterprise: "Auto Park Chrysler Dodge Jeep Ram", enterpriseId: "87b2e0c86", user: "tejas.kumar@spyne.co.in", reason: "Remove BG - Trunk", date: "2 Sep, 2026, 00:27", img: "https://spyne-prod-studio.s3.amazonaws.com/similarity/87b2e0c86/b081b27e0/1FTBR1C83TKB01547/9eeae3b5-fdad-42f4-8ac5-c51fe9bb6529.jpg" },
+      { id: "24,392,243", enterprise: "Rick Weaver Chevrolet", enterpriseId: "3d5f779d7", user: "shabnam.sheikh@spyne.co.in", reason: "Floor Extension", date: "2 Sep, 2026, 05:00", img: "https://spyne-prod-app-assets.s3.us-east-1.amazonaws.com/2026-08-31/3d5f779d7/d4a682cb2a/6a8fcb05ac396a96c58c5d5b/0a15fb4d6c9547a6a7ac7cb76fc5629e/9433f6479d934f46bda36e16a3b75236.png" },
+      { id: "24,393,827", enterprise: "Jim Schmidt Automotive", enterpriseId: "f2c1c3e12", user: "vikas.gupta@spyne.co.in", reason: "Remove BG - Trunk", date: "2 Sep, 2026, 05:53", img: "https://spyne-prod-studio.s3.amazonaws.com/similarity/f2c1c3e12/d368148181/KL77LHEP9SC230855/a92dd710-229f-404b-b8fa-bb48a46efdde.jpg" },
+      { id: "24,393,941", enterprise: "IM Marketplace GmBH", enterpriseId: "00d2aafe9", user: "bhanu.solanki@spyne.co.in", reason: "Remove BG - Tyre", date: "2 Sep, 2026, 05:57", img: "https://spyne-media.s3.amazonaws.com/2026-09-01/79d9e4a0-6696-466a-b18a-7218ee9fbceb.jpeg" },
+      { id: "24,394,004", enterprise: "Jim Schmidt Automotive", enterpriseId: "f2c1c3e12", user: "vikas.gupta@spyne.co.in", reason: "Remove BG - Trunk", date: "2 Sep, 2026, 05:59", img: "https://spyne-prod-studio.s3.amazonaws.com/similarity/f2c1c3e12/9f44b785f9/2GNALCEK2H1504080/f212eb8b-3157-46a0-82d4-01fc39c761f2.jpg" },
+      { id: "24,394,209", enterprise: "S&L Motors, Pulaski WI", enterpriseId: "cd4fb95bc", user: "kavi.singh@spyne.co.in", reason: "Seethrough - Trunk", date: "2 Sep, 2026, 06:04", img: "https://spyne-test.s3.us-east-1.amazonaws.com/cd4fb95bc/82e481c979/672b/2026-09-01%2017-52-57.JPG" },
+      { id: "24,394,578", enterprise: "Rohrich Automotive Group", enterpriseId: "00e6652a1", user: "kavi.singh@spyne.co.in", reason: "Seethrough - Trunk", date: "2 Sep, 2026, 06:14", img: "https://spyne-prod-app-assets.s3.us-east-1.amazonaws.com/2026-09-01/00e6652a1/4c81875e-7/6a89772d44e2f3bc94711562/fec503b977014edb8db37f50c8bc9bfe/2527abb9e96a4a7e981a05a6deef4c7f.png" },
+      { id: "24,395,970", enterprise: "Simmons-Rockwell Automotive Dealerships", enterpriseId: "d94a891e5", user: "kavi.singh@spyne.co.in", reason: "Focus shot-Shadow", date: "2 Sep, 2026, 06:55", img: "https://spyne-prod-studio.s3.amazonaws.com/similarity/d94a891e5/5475b886-f/1GT4UNE70TF367555/5ad8aa1e-4773-49c6-a927-dbc193692924.jpg" },
+      { id: "24,396,128", enterprise: "Kayser Chevrolet", enterpriseId: "7f17a5f34", user: "dinesh.mishra@spyne.co.in", reason: "Remove BG - Tyre", date: "2 Sep, 2026, 07:01", img: "https://spyne-prod-app-assets.s3.us-east-1.amazonaws.com/2026-09-01/7f17a5f34/67d0e8a49f/6a90ad93970a12a8cacf4d16/5b81b58350bc4f28ba26e87ecdb62591/9349f854057b468c974749233788ad82.jpg" },
+      { id: "24,396,439", enterprise: "Blasius Kia", enterpriseId: "88944f333", user: "kavi.singh@spyne.co.in", reason: "Focus Shot - See Through", date: "2 Sep, 2026, 07:12", img: "https://spyne-prod-app-assets.s3.us-east-1.amazonaws.com/2026-08-29/88944f333/d73c8ecd12/6a90ad9b4c4b1e80bb230048/25e4604ecbed4bda8688642b424c8eb1/abbd293cac3c481285f5e36c636a8e67.png" },
+      { id: "24,396,637", enterprise: "Paragon Motors of Woodside Inc dba Paragon Honda", enterpriseId: "21de286e9", user: "kavi.singh@spyne.co.in", reason: "Focus Shot - See Through", date: "2 Sep, 2026, 07:21", img: "https://spyne-prod-studio.s3.amazonaws.com/similarity/21de286e9/5895de05b/2HGFE2F54RH525339/f2996a36-cca6-4a32-bcb5-dfdc94d441d0.jpg" },
+      { id: "24,396,660", enterprise: "Ryan Buick GMC Cadillac", enterpriseId: "90410e297", user: "pradeep.singh@spyne.co.in", reason: "Seethrough - Trunk", date: "2 Sep, 2026, 07:22", img: "https://spyne-prod-app-assets.s3.us-east-1.amazonaws.com/2026-09-01/90410e297/3e5d87bf71/6a907bf80511548c70a6c19b/b16ab7b9cc2c42eb96ac81595cd1eed7/b7eea74831e34d52aaeee30e90424fe7.jpg" },
+      { id: "24,397,089", enterprise: "Bob Allen Ford- Ottawa", enterpriseId: "b047d91bc", user: "rahul.ranjan@spyne.co.in", reason: "Seethrough - Trunk", date: "2 Sep, 2026, 07:37", img: "https://spyne-prod-studio.s3.amazonaws.com/similarity/b047d91bc/711e1fc331/3FTTW8A30RRB23989/513bf161-fe83-4639-9c61-c668b1056223.jpg" },
+      { id: "24,407,543", enterprise: "Apex Automotive Group", enterpriseId: "bb63009cf", user: "bashishth.singh@spyne.co.in", reason: "Remove BG - Tyre", date: "2 Sep, 2026, 17:30", img: "https://spyne-prod-studio.s3.amazonaws.com/similarity/bb63009cf/1302536ea/4S4BTGUD3R3276461/0436074b-5757-4328-83a9-d69a0fb9e920.jpg" },
+      { id: "24,410,231", enterprise: "Speedway Car Sales", enterpriseId: "6460d434f", user: "shailender.singh@spyne.co.in", reason: "360int", date: "2 Sep, 2026, 19:28", img: "https://spyne-prod-app-assets.s3.us-east-1.amazonaws.com/2026-09-02/6460d434f/0abc268d5e/693fd342141fb931e3a03898/9f36dfaca57a48eaa69d3b27aaa3ad5f/05cbf9e8549a4e0e8a6076e486859270.png" },
+      { id: "24,411,005", enterprise: "Silsbee Ford", enterpriseId: "2e0d94823", user: "shailender.singh@spyne.co.in", reason: "Focus Shot - See Through", date: "2 Sep, 2026, 19:53", img: "https://spyne-prod-studio.s3.amazonaws.com/similarity/2e0d94823/14c63186cc/1FD0W4HT6TEF01725/325d17a7-57e5-4dc2-9c95-3cf48b2a806a.jpg" }
+    ];
 
-        // ----- build table -----
-        const tbody = document.getElementById('tableBody');
-        const searchInput = document.getElementById('searchInput');
-        const statsDisplay = document.getElementById('statsDisplay');
-        const visibleCountSpan = document.getElementById('visibleCount');
+    // ---------- DOM refs ----------
+    const gallery = document.getElementById('galleryContainer');
+    const statsEl = document.getElementById('statsDisplay');
+    const enterpriseSelect = document.getElementById('enterpriseFilter');
+    const userSelect = document.getElementById('userFilter');
+    const searchInput = document.getElementById('searchFilter');
 
-        function renderRows(filter = '') {
-            const lowerFilter = filter.toLowerCase();
-            let visible = 0;
+    // ---------- helpers ----------
+    function getUnique(arr, key) {
+      const map = new Map();
+      arr.forEach(item => {
+        const val = item[key]?.trim();
+        if (val) map.set(val, true);
+      });
+      return Array.from(map.keys()).sort();
+    }
 
-            let html = '';
-            for (const row of rawRows) {
-                // build searchable fields
-                const searchable = [
-                    row.id,
-                    row.enterprise_name,
-                    row.enterprise_id,
-                    row.rejected_by_user_email || '',
-                    row.rejected_comment || '',
-                    row.created_on || ''
-                ].join(' ').toLowerCase();
+    function render() {
+      const selectedEnterprise = enterpriseSelect.value;
+      const selectedUser = userSelect.value;
+      const searchTerm = searchInput.value.toLowerCase().trim();
 
-                if (lowerFilter && !searchable.includes(lowerFilter)) {
-                    continue;
-                }
+      const filtered = records.filter(item => {
+        const matchEnterprise = !selectedEnterprise || item.enterprise === selectedEnterprise;
+        const matchUser = !selectedUser || item.user === selectedUser;
+        const searchable = (item.id + item.enterprise + item.user + item.reason + item.date).toLowerCase();
+        const matchSearch = !searchTerm || searchable.includes(searchTerm);
+        return matchEnterprise && matchUser && matchSearch;
+      });
 
-                visible++;
-                const userDisplay = row.rejected_by_user_email
-                    ? `<span class="user-email">${row.rejected_by_user_email}</span>`
-                    : `<span class="empty">—</span>`;
+      // update stats
+      statsEl.textContent = `${filtered.length} / ${records.length} items`;
 
-                const enterpriseDisplay = row.enterprise_name
-                    ? `<span class="enterprise">${row.enterprise_name}</span>`
-                    : `<span class="empty">—</span>`;
+      if (filtered.length === 0) {
+        gallery.innerHTML = `<div class="no-results">✨ No images match the current filters</div>`;
+        return;
+      }
 
-                const enterpriseIdDisplay = row.enterprise_id
-                    ? `<code style="background:#f1f5f9; padding:2px 6px; border-radius:6px; font-size:0.75rem;">${row.enterprise_id}</code>`
-                    : `<span class="empty">—</span>`;
+      let html = '';
+      filtered.forEach(item => {
+        const userDisplay = item.user ? item.user : '<span class="empty">no user</span>';
+        const imgTag = item.img
+          ? `<img src="${item.img}" alt="preview" loading="lazy" onerror="this.onerror=null;this.parentElement.innerHTML='<span class=\\'no-img\\'>⚠️ image not available</span>';">`
+          : `<span class="no-img">no image</span>`;
 
-                const reasonDisplay = row.rejected_comment
-                    ? `<span class="badge">${row.rejected_comment}</span>`
-                    : `<span class="empty">—</span>`;
+        html += `
+          <div class="card">
+            <div class="card-image">${imgTag}</div>
+            <div class="card-body">
+              <div class="card-id">ID ${item.id}</div>
+              <div class="card-enterprise">
+                ${item.enterprise}
+                <span class="badge">${item.enterpriseId || ''}</span>
+              </div>
+              <div class="card-user">👤 ${userDisplay}</div>
+              <div class="card-meta">
+                <span class="reason">${item.reason || '—'}</span>
+                <span>${item.date || ''}</span>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+      gallery.innerHTML = html;
+    }
 
-                html += `<tr>
-                    <td><span style="font-weight:500;">${row.id}</span></td>
-                    <td>${enterpriseDisplay}</td>
-                    <td>${enterpriseIdDisplay}</td>
-                    <td>${userDisplay}</td>
-                    <td>${reasonDisplay}</td>
-                    <td style="font-size:0.8rem; color:#475569;">${row.created_on || '<span class="empty">—</span>'}</td>
-                    <td><span class="badge" style="background:#dbeafe; color:#1e40af;">re‑edit</span></td>
-                </tr>`;
-            }
+    // ---------- populate filters ----------
+    function populateSelects() {
+      const enterprises = getUnique(records, 'enterprise');
+      const users = getUnique(records, 'user');
 
-            if (visible === 0) {
-                html = `<tr><td colspan="7" class="no-results">🔍 No matching records. Try a different filter.</td></tr>`;
-            }
+      enterpriseSelect.innerHTML = '<option value="">All</option>' +
+        enterprises.map(e => `<option value="${e}">${e}</option>`).join('');
 
-            tbody.innerHTML = html;
-            statsDisplay.textContent = `${rawRows.length} total · ${visible} shown`;
-            visibleCountSpan.textContent = visible;
-        }
+      userSelect.innerHTML = '<option value="">All</option>' +
+        users.map(u => `<option value="${u}">${u}</option>`).join('');
+    }
 
-        // initial render
-        renderRows('');
+    // ---------- event listeners ----------
+    enterpriseSelect.addEventListener('change', render);
+    userSelect.addEventListener('change', render);
+    searchInput.addEventListener('input', render);
 
-        // search handler
-        let searchTimeout;
-        searchInput.addEventListener('input', function() {
-            clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(() => {
-                renderRows(this.value);
-            }, 180);
-        });
+    // ---------- init ----------
+    populateSelects();
+    render();
 
-        // small note: enterprise & user fields are clearly present
-        console.log('✅ Enterprise & user details are present in each row (empty fields are shown as —)');
-    })();
+    // small note: enterprise & user fields are clearly visible in cards
+    console.log('✅ Enterprise & user details are present in each card. Missing values show as "no user" or empty.');
+  })();
 </script>
 </body>
 </html>
