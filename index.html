@@ -356,7 +356,6 @@
             font-size: 11px;
             color: #9ca3af;
         }
-        /* NEW: Enterprise name styling */
         .gallery-card .gallery-info .gallery-enterprise {
             font-size: 12px;
             font-weight: 600;
@@ -864,7 +863,7 @@
 
         const rejectSet = new Set();
         data.forEach(r => {
-            const rc = r['Reject Comment'] || 'None';
+            const rc = r['rejected_comment'] || r['Reject Comment'] || 'None';
             if (rc !== 'None') rejectSet.add(rc);
         });
         const rejectSelect = document.getElementById('rejectFilter');
@@ -899,7 +898,7 @@
             }
             // Date filter
             if (dateFrom || dateTo) {
-                const dateStr = row['Date'] || row['created_at'] || '';
+                const dateStr = row['created_on'] || row['Date'] || '';
                 if (dateStr) {
                     const d = new Date(dateStr);
                     if (dateFrom && d < new Date(dateFrom)) return false;
@@ -908,7 +907,7 @@
             }
             // Reject comment filter
             if (rejectFilter) {
-                const rc = row['Reject Comment'] || '';
+                const rc = row['rejected_comment'] || row['Reject Comment'] || '';
                 if (rc !== rejectFilter) return false;
             }
             // Search filter
@@ -1040,7 +1039,7 @@
         // Timeline chart
         const dateCounts = {};
         data.forEach(row => {
-            const dateStr = row['Date'] || row['created_at'] || '';
+            const dateStr = row['created_on'] || row['Date'] || '';
             if (dateStr) {
                 const date = new Date(dateStr).toLocaleDateString();
                 dateCounts[date] = (dateCounts[date] || 0) + 1;
@@ -1138,15 +1137,63 @@
             const id = row['id'] || row['ID'] || 'N/A';
             const action = row['image_action'] || 'Unknown';
             const user = row['User Details - Rejected By User__email_id'] || 'Unknown';
-            const date = row['Date'] || row['created_at'] || '';
-            const rejectComment = row['Reject Comment'] || '';
-            const enterprise = row['enterprise_name'] || row['Enterprise Name'] || row['enterprise'] || 'N/A';
+            const date = row['created_on'] || row['Date'] || '';
+            const rejectComment = row['rejected_comment'] || row['Reject Comment'] || '';
             
-            // Get image URLs (try multiple possible column names)
+            // ----- ENTERPRISE NAME - EXACT COLUMN MATCH -----
+            let enterprise = 'N/A';
+            
+            // Primary column: Enterprise Details - Enterprise__name
+            if (row['Enterprise Details - Enterprise__name'] && 
+                row['Enterprise Details - Enterprise__name'].trim() && 
+                row['Enterprise Details - Enterprise__name'].trim() !== 'N/A' && 
+                row['Enterprise Details - Enterprise__name'].trim() !== 'NA') {
+                enterprise = row['Enterprise Details - Enterprise__name'].trim();
+            }
+            // Fallback: try other possible column names
+            else {
+                const fallbackColumns = [
+                    'Enterprise__name',
+                    'enterprise_name',
+                    'Enterprise Name',
+                    'enterprise',
+                    'Enterprise',
+                    'company_name',
+                    'Company Name',
+                    'company',
+                    'brand_name',
+                    'Brand Name'
+                ];
+                for (const col of fallbackColumns) {
+                    if (row[col] && row[col].trim() && row[col].trim() !== 'N/A' && row[col].trim() !== 'NA') {
+                        enterprise = row[col].trim();
+                        break;
+                    }
+                }
+            }
+            
+            // If still N/A, try to extract from email domain
+            if (enterprise === 'N/A' && user && user !== 'Unknown' && user.includes('@')) {
+                const domain = user.split('@')[1];
+                if (domain) {
+                    const name = domain.split('.')[0];
+                    if (name && name !== 'gmail' && name !== 'yahoo' && name !== 'outlook' && name !== 'hotmail') {
+                        enterprise = name.charAt(0).toUpperCase() + name.slice(1);
+                    }
+                }
+            }
+            
+            // Get image URLs
             const imgUrls = [];
             const possibleImageCols = [
-                'output_image_url', 'image_url', 'output_url', 
-                'Image URL', 'output', 'url', 'img_url'
+                'output_image_hres_url',
+                'output_image_url', 
+                'image_url', 
+                'output_url', 
+                'Image URL', 
+                'output', 
+                'url', 
+                'img_url'
             ];
             possibleImageCols.forEach(col => {
                 if (row[col] && row[col].trim()) {
@@ -1220,9 +1267,9 @@
                 const id = row['id'] || row['ID'] || 'N/A';
                 const action = row['image_action'] || 'Unknown';
                 const user = row['User Details - Rejected By User__email_id'] || 'Unknown';
-                const date = row['Date'] || row['created_at'] || '';
-                const rejectComment = row['Reject Comment'] || '';
-                const outputUrl = row['output_image_url'] || row['image_url'] || '';
+                const date = row['created_on'] || row['Date'] || '';
+                const rejectComment = row['rejected_comment'] || row['Reject Comment'] || '';
+                const outputUrl = row['output_image_hres_url'] || row['output_image_url'] || '';
                 
                 return `
                     <tr>
@@ -1261,8 +1308,8 @@
                 valA = a['User Details - Rejected By User__email_id'] || '';
                 valB = b['User Details - Rejected By User__email_id'] || '';
             } else if (key === 'date') {
-                valA = a['Date'] || a['created_at'] || '';
-                valB = b['Date'] || b['created_at'] || '';
+                valA = a['created_on'] || a['Date'] || '';
+                valB = b['created_on'] || b['Date'] || '';
             }
             return sortAsc ? valA.localeCompare(valB) : valB.localeCompare(valA);
         });
@@ -1287,9 +1334,7 @@
 
     // ---------- INIT ----------
     document.addEventListener('DOMContentLoaded', function() {
-        // Show loading state
         document.getElementById('loadingIndicator').style.display = 'block';
-        // Auto-show analytics view
         document.getElementById('analyticsView').style.display = 'block';
         document.getElementById('galleryView').style.display = 'none';
         document.getElementById('tableView').style.display = 'none';
