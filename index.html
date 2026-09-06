@@ -539,7 +539,7 @@
         <div class="table-wrapper">
             <div class="table-header">
                 <h3><i class="fas fa-list-ul" style="margin-right:8px;color:#4F46E5;"></i>All Records</h3>
-                <input type="text" id="searchInput" placeholder="🔍 Search by ID, user, action..." />
+                <input type="text" id="searchInput" placeholder="🔍 Search by ID, user, enterprise..." oninput="applyFilters()" />
             </div>
             <div class="table-scroll">
                 <table id="dataTable">
@@ -580,6 +580,7 @@
     let sortAsc = true;
     let chartInstances = {};
     let currentView = 'analytics';
+    let isDataLoaded = false;
 
     const COLORS = [
         '#4F46E5', '#EF4444', '#10B981', '#F59E0B', '#8B5CF6',
@@ -612,31 +613,51 @@
     function parseCSV(text) {
         const lines = text.split('\n').filter(line => line.trim() !== '');
         if (lines.length === 0) return [];
-        const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+        
+        // Parse headers properly - handle quoted fields
+        const headerLine = lines[0];
+        const headers = [];
+        let current = '';
+        let insideQuotes = false;
+        for (let i = 0; i < headerLine.length; i++) {
+            const ch = headerLine[i];
+            if (ch === '"') {
+                insideQuotes = !insideQuotes;
+            } else if (ch === ',' && !insideQuotes) {
+                headers.push(current.trim().replace(/^"|"$/g, ''));
+                current = '';
+            } else {
+                current += ch;
+            }
+        }
+        headers.push(current.trim().replace(/^"|"$/g, ''));
+        
         const result = [];
         for (let i = 1; i < lines.length; i++) {
-            let row = [];
+            const line = lines[i];
+            if (!line.trim()) continue;
+            
+            const row = [];
             let current = '';
             let insideQuotes = false;
-            const line = lines[i];
             for (let j = 0; j < line.length; j++) {
                 const ch = line[j];
                 if (ch === '"') {
                     insideQuotes = !insideQuotes;
                 } else if (ch === ',' && !insideQuotes) {
-                    row.push(current.trim());
+                    row.push(current.trim().replace(/^"|"$/g, ''));
                     current = '';
                 } else {
                     current += ch;
                 }
             }
-            row.push(current.trim());
+            row.push(current.trim().replace(/^"|"$/g, ''));
+            
             if (row.length < headers.length) continue;
+            
             const obj = {};
             headers.forEach((h, idx) => {
-                let val = row[idx] || '';
-                val = val.replace(/^"|"$/g, '');
-                obj[h] = val;
+                obj[h] = row[idx] || '';
             });
             result.push(obj);
         }
@@ -717,6 +738,7 @@
 
     function onDataLoaded(data) {
         allData = data;
+        isDataLoaded = true;
         document.getElementById('loadingIndicator').style.display = 'none';
         document.getElementById('rowCount').textContent = data.length;
         document.getElementById('updateTime').textContent = new Date().toLocaleString();
@@ -729,7 +751,8 @@
         galleryPage = 1;
         currentPage = 1;
         
-        renderCurrentView();
+        // Show analytics view by default
+        switchView('analytics');
     }
 
     function populateFilterOptions(data) {
@@ -778,6 +801,8 @@
 
     // AUTO-APPLY FILTERS - called on any filter change
     function applyFilters() {
+        if (!isDataLoaded) return;
+        
         const userFilter = document.getElementById('userFilter').value;
         const enterpriseFilter = document.getElementById('enterpriseFilter').value;
         const dateFrom = document.getElementById('dateFrom').value;
@@ -818,3 +843,368 @@
         galleryPage = 1;
         currentPage = 1;
         renderCurrentView();
+    }
+
+    // Setup auto-filter on all filter inputs
+    function setupAutoFilter() {
+        const filterIds = ['userFilter', 'enterpriseFilter', 'dateFrom', 'dateTo', 'rejectFilter'];
+        filterIds.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.addEventListener('change', applyFilters);
+                el.addEventListener('input', applyFilters);
+            }
+        });
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            searchInput.addEventListener('input', applyFilters);
+        }
+    }
+
+    function clearAllFilters() {
+        document.getElementById('userFilter').value = '';
+        document.getElementById('enterpriseFilter').value = '';
+        document.getElementById('dateFrom').value = '';
+        document.getElementById('dateTo').value = '';
+        document.getElementById('rejectFilter').value = '';
+        if (document.getElementById('searchInput')) {
+            document.getElementById('searchInput').value = '';
+        }
+        applyFilters();
+    }
+
+    function switchView(view) {
+        currentView = view;
+        document.getElementById('analyticsView').style.display = view === 'analytics' ? 'block' : 'none';
+        document.getElementById('galleryView').style.display = view === 'gallery' ? 'block' : 'none';
+        document.getElementById('tableView').style.display = view === 'table' ? 'block' : 'none';
+        
+        document.getElementById('btnAnalytics').classList.toggle('active', view === 'analytics');
+        document.getElementById('btnGallery').classList.toggle('active', view === 'gallery');
+        document.getElementById('btnTable').classList.toggle('active', view === 'table');
+        
+        renderCurrentView();
+    }
+
+    function renderCurrentView() {
+        if (currentView === 'analytics') renderAnalytics(filteredData);
+        else if (currentView === 'gallery') renderGallery(filteredData);
+        else if (currentView === 'table') renderTable(filteredData);
+    }
+
+    function renderAnalytics(data) {
+        if (!data || data.length === 0) {
+            const ctx = document.getElementById('actionChart').getContext('2d');
+            ctx.clearRect(0, 0, 400, 200);
+            return;
+        }
+
+        const actionCounts = {};
+        data.forEach(row => {
+            const action = row['image_action'] || 'Unknown';
+            actionCounts[action] = (actionCounts[action] || 0) + 1;
+        });
+        const actions = Object.keys(actionCounts).sort((a, b) => actionCounts[b] - actionCounts[a]);
+        const legendEl = document.getElementById('colorLegend');
+        legendEl.innerHTML = actions.slice(0, 15).map((action, i) => {
+            const color = getColorForAction(action, i);
+            return `<span><span class="color-swatch" style="background:${color}"></span>${action}</span>`;
+        }).join('');
+
+        const ctx1 = document.getElementById('actionChart').getContext('2d');
+        if (chartInstances.actionChart) chartInstances.actionChart.destroy();
+        chartInstances.actionChart = new Chart(ctx1, {
+            type: 'pie',
+            data: {
+                labels: actions.slice(0, 15),
+                datasets: [{
+                    data: actions.slice(0, 15).map(a => actionCounts[a]),
+                    backgroundColor: actions.slice(0, 15).map((a, i) => getColorForAction(a, i)),
+                    borderWidth: 2,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } }
+            }
+        });
+
+        const userCounts = {};
+        data.forEach(row => {
+            const user = getUserId(row);
+            userCounts[user] = (userCounts[user] || 0) + 1;
+        });
+        const users = Object.keys(userCounts).sort((a, b) => userCounts[b] - userCounts[a]).slice(0, 15);
+        const ctx2 = document.getElementById('userChart').getContext('2d');
+        if (chartInstances.userChart) chartInstances.userChart.destroy();
+        chartInstances.userChart = new Chart(ctx2, {
+            type: 'bar',
+            data: {
+                labels: users,
+                datasets: [{
+                    label: 'Tasks',
+                    data: users.map(u => userCounts[u]),
+                    backgroundColor: '#4F46E5',
+                    borderRadius: 4,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+
+        const dateCounts = {};
+        data.forEach(row => {
+            const dateStr = row['created_on'] || row['Date'] || '';
+            if (dateStr) {
+                const date = new Date(dateStr).toLocaleDateString();
+                dateCounts[date] = (dateCounts[date] || 0) + 1;
+            }
+        });
+        const dates = Object.keys(dateCounts).sort((a, b) => new Date(a) - new Date(b)).slice(-30);
+        const ctx3 = document.getElementById('timelineChart').getContext('2d');
+        if (chartInstances.timelineChart) chartInstances.timelineChart.destroy();
+        chartInstances.timelineChart = new Chart(ctx3, {
+            type: 'line',
+            data: {
+                labels: dates,
+                datasets: [{
+                    label: 'Tasks',
+                    data: dates.map(d => dateCounts[d] || 0),
+                    borderColor: '#4F46E5',
+                    backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                    fill: true,
+                    tension: 0.4,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+
+        const topUsers = users.slice(0, 5);
+        const stackedData = {};
+        topUsers.forEach(user => {
+            stackedData[user] = {};
+            data.filter(row => getUserId(row) === user)
+                .forEach(row => {
+                    const action = row['image_action'] || 'Unknown';
+                    stackedData[user][action] = (stackedData[user][action] || 0) + 1;
+                });
+        });
+        const allActions = new Set();
+        topUsers.forEach(user => {
+            Object.keys(stackedData[user]).forEach(a => allActions.add(a));
+        });
+        const ctx4 = document.getElementById('stackedChart').getContext('2d');
+        if (chartInstances.stackedChart) chartInstances.stackedChart.destroy();
+        const datasets = Array.from(allActions).map((action, i) => ({
+            label: action,
+            data: topUsers.map(user => stackedData[user][action] || 0),
+            backgroundColor: getColorForAction(action, i),
+        }));
+        chartInstances.stackedChart = new Chart(ctx4, {
+            type: 'bar',
+            data: {
+                labels: topUsers,
+                datasets: datasets
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } }
+                },
+                scales: {
+                    x: { stacked: true },
+                    y: { stacked: true, beginAtZero: true }
+                }
+            }
+        });
+    }
+
+    function renderGallery(data) {
+        const container = document.getElementById('galleryContainer');
+        const empty = document.getElementById('galleryEmpty');
+        const loadMore = document.getElementById('galleryLoadMore');
+        
+        if (!data || data.length === 0) {
+            container.innerHTML = '';
+            empty.style.display = 'block';
+            loadMore.style.display = 'none';
+            return;
+        }
+        empty.style.display = 'none';
+
+        const end = Math.min(galleryPage * galleryItemsPerPage, data.length);
+        const pageData = data.slice(0, end);
+
+        container.innerHTML = pageData.map(row => {
+            const id = row['id'] || row['ID'] || 'N/A';
+            const action = row['image_action'] || 'Unknown';
+            const user = getUserId(row);
+            const enterprise = getEnterprise(row);
+            const date = row['created_on'] || row['Date'] || '';
+            const rejectComment = row['rejected_comment'] || row['Reject Comment'] || '';
+            
+            const inputImage = row['input_image_hres_url'] || '';
+            const outputImage = row['output_image_hres_url'] || '';
+            const manualImage = row['manual_edited_hres_url'] || '';
+
+            const images = [
+                { url: inputImage, label: 'Input', class: 'input' },
+                { url: outputImage, label: 'Output', class: 'output' },
+                { url: manualImage, label: 'Manual', class: 'manual' }
+            ];
+
+            const imagesHtml = images.map(img => {
+                if (img.url && img.url.trim() && img.url !== 'null') {
+                    return `<div class="img-wrapper">
+                        <img src="${img.url}" alt="${img.label}" loading="lazy" onerror="this.parentElement.innerHTML='<div class=\\'placeholder\\'><i class=\\'fas fa-image\\'></i>No ${img.label}</div>'" />
+                        <span class="image-label ${img.class}">${img.label}</span>
+                    </div>`;
+                } else {
+                    return `<div class="img-wrapper">
+                        <div class="placeholder"><i class="fas fa-image"></i>No ${img.label}</div>
+                    </div>`;
+                }
+            }).join('');
+
+            return `
+                <div class="gallery-card">
+                    <div class="image-grid">
+                        ${imagesHtml}
+                    </div>
+                    <div class="gallery-info">
+                        <div class="gallery-id">#${id}</div>
+                        <div class="gallery-meta">
+                            <span class="badge-action">${action}</span>
+                            <span class="gallery-user"><i class="fas fa-user"></i> ${user}</span>
+                        </div>
+                        <div class="gallery-enterprise">
+                            <i class="fas fa-building"></i> ${enterprise}
+                        </div>
+                        <div class="gallery-meta" style="margin-top:4px;">
+                            <span class="gallery-date"><i class="far fa-calendar-alt"></i> ${date || 'N/A'}</span>
+                        </div>
+                        ${rejectComment ? `<div class="gallery-comment"><i class="fas fa-comment"></i> ${rejectComment}</div>` : ''}
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        loadMore.style.display = end < data.length ? 'block' : 'none';
+    }
+
+    function loadMoreGallery() {
+        galleryPage++;
+        renderGallery(filteredData);
+    }
+
+    function renderTable(data) {
+        const tbody = document.getElementById('tableBody');
+        const total = data.length;
+        const totalPages = Math.ceil(total / rowsPerPage);
+        if (currentPage > totalPages) currentPage = totalPages || 1;
+        
+        const start = (currentPage - 1) * rowsPerPage;
+        const end = Math.min(start + rowsPerPage, total);
+        const pageData = data.slice(start, end);
+
+        if (pageData.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:30px;color:#9ca3af;">No records found</td></tr>`;
+        } else {
+            tbody.innerHTML = pageData.map(row => {
+                const id = row['id'] || row['ID'] || 'N/A';
+                const action = row['image_action'] || 'Unknown';
+                const user = getUserId(row);
+                const enterprise = getEnterprise(row);
+                const date = row['created_on'] || row['Date'] || '';
+                const rejectComment = row['rejected_comment'] || row['Reject Comment'] || '';
+                const outputUrl = row['output_image_hres_url'] || row['output_image_url'] || '';
+                
+                return `
+                    <tr>
+                        <td><strong>${id}</strong></td>
+                        <td><span class="badge-action">${action}</span></td>
+                        <td>${user}</td>
+                        <td>${enterprise}</td>
+                        <td>${date}</td>
+                        <td><span class="reject-comment">${rejectComment || '-'}</span></td>
+                        <td>${outputUrl ? `<a href="${outputUrl}" target="_blank"><i class="fas fa-external-link-alt"></i> View</a>` : '-'}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        document.getElementById('tableInfo').textContent = `Showing ${start + 1}-${Math.min(end, total)} of ${total}`;
+        document.getElementById('pageInfo').textContent = `Page ${currentPage} of ${totalPages || 1}`;
+    }
+
+    function sortTable(key) {
+        if (sortKey === key) {
+            sortAsc = !sortAsc;
+        } else {
+            sortKey = key;
+            sortAsc = true;
+        }
+        filteredData.sort((a, b) => {
+            let valA, valB;
+            if (key === 'id') {
+                valA = a['id'] || a['ID'] || '';
+                valB = b['id'] || b['ID'] || '';
+            } else if (key === 'action') {
+                valA = a['image_action'] || '';
+                valB = b['image_action'] || '';
+            } else if (key === 'user') {
+                valA = getUserId(a);
+                valB = getUserId(b);
+            } else if (key === 'enterprise') {
+                valA = getEnterprise(a);
+                valB = getEnterprise(b);
+            } else if (key === 'date') {
+                valA = a['created_on'] || a['Date'] || '';
+                valB = b['created_on'] || b['Date'] || '';
+            }
+            return sortAsc ? valA.localeCompare(valB) : valB.localeCompare(valA);
+        });
+        renderTable(filteredData);
+    }
+
+    function prevPage() {
+        if (currentPage > 1) {
+            currentPage--;
+            renderTable(filteredData);
+        }
+    }
+
+    function nextPage() {
+        const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+        if (currentPage < totalPages) {
+            currentPage++;
+            renderTable(filteredData);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('loadingIndicator').style.display = 'block';
+        document.getElementById('analyticsView').style.display = 'block';
+        document.getElementById('galleryView').style.display = 'none';
+        document.getElementById('tableView').style.display = 'none';
+        
+        // Setup auto-filter on all filter inputs
+        setupAutoFilter();
+        
+        // Show sample data if no file is loaded
+        console.log('📊 Dashboard ready. Upload a CSV file to start.');
+    });
+</script>
+</body>
+</html>
