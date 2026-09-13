@@ -16,6 +16,7 @@
   }
   .dashboard { max-width: 1440px; margin: 0 auto; }
 
+  /* ---------- HEADER ---------- */
   .header {
     display: flex; justify-content: space-between; align-items: center;
     margin-bottom: 24px; flex-wrap: wrap; gap: 12px;
@@ -29,6 +30,7 @@
   }
   .last-updated { color: #6b7a93; font-size: 12px; margin-top: 4px; }
 
+  /* ---------- UPLOAD ---------- */
   .upload-section {
     background: #fff; border-radius: 14px;
     padding: 14px 20px; border: 1px solid #eef2f6;
@@ -55,6 +57,7 @@
   .file-info { font-size: 12px; color: #6b7a93; }
   .file-info strong { color: #1a1f36; }
 
+  /* ---------- FILTERS ---------- */
   .filters-section {
     background: #fff; border-radius: 14px;
     padding: 18px 22px; border: 1px solid #eef2f6;
@@ -95,6 +98,7 @@
   }
   .filter-stats strong { color: #1a1f36; }
 
+  /* ---------- VIEW TOGGLE ---------- */
   .view-toggle {
     display: flex; gap: 6px; background: #f1f4f9;
     padding: 4px; border-radius: 10px; margin-bottom: 20px;
@@ -112,6 +116,7 @@
   }
   .view-toggle button i { margin-right: 6px; }
 
+  /* ---------- LOADING ---------- */
   .loading-text { color: #6b7a93; padding: 40px; text-align: center; font-size: 13px; }
   .spinner {
     display: inline-block; width: 18px; height: 18px;
@@ -121,6 +126,7 @@
   }
   @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
+  /* ---------- CHARTS ---------- */
   .charts-grid {
     display: grid; grid-template-columns: 1fr 1fr;
     gap: 20px; margin-bottom: 24px;
@@ -143,6 +149,7 @@
     border-radius: 3px; margin-right: 5px;
   }
 
+  /* ---------- GALLERY ---------- */
   .gallery-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
@@ -230,6 +237,7 @@
   }
   .gallery-empty i { font-size: 42px; display: block; margin-bottom: 14px; }
 
+  /* ---------- LIGHTBOX ---------- */
   .lightbox {
     display: none;
     position: fixed;
@@ -284,6 +292,7 @@
   }
   .lightbox .caption i { margin-right: 8px; color: #4F46E5; }
 
+  /* ---------- TABLE ---------- */
   .table-wrapper {
     background: #fff; border-radius: 14px;
     border: 1px solid #eef2f6; padding: 16px 14px 8px;
@@ -334,6 +343,7 @@
   }
   .pagination button:hover { background: #f1f4f9; }
 
+  /* ---------- RESPONSIVE ---------- */
   @media (max-width: 900px) {
     .charts-grid { grid-template-columns: 1fr; }
     .filters-grid { grid-template-columns: 1fr 1fr; }
@@ -354,6 +364,7 @@
 <body>
 <div class="dashboard">
 
+  <!-- HEADER -->
   <div class="header">
     <div>
       <h1><i class="fas fa-images"></i> Image Re-edit Dashboard</h1>
@@ -365,6 +376,7 @@
     <span class="badge"><i class="fas fa-database"></i> <span id="rowCount">0</span> records</span>
   </div>
 
+  <!-- UPLOAD -->
   <div class="upload-section">
     <span class="upload-label"><i class="fas fa-upload"></i> Upload CSV:</span>
     <input type="file" id="csvFileInput" accept=".csv" />
@@ -375,6 +387,7 @@
     <span class="file-info"><i class="fas fa-file-csv"></i> <strong id="currentFile">No file chosen</strong></span>
   </div>
 
+  <!-- FILTERS -->
   <div class="filters-section">
     <div class="filters-title">
       <span><i class="fas fa-sliders-h"></i> Filters</span>
@@ -407,16 +420,19 @@
     </div>
   </div>
 
+  <!-- VIEW TOGGLE -->
   <div class="view-toggle">
     <button class="active" id="btnAnalytics" onclick="switchView('analytics')"><i class="fas fa-chart-bar"></i> Analytics</button>
     <button id="btnGallery" onclick="switchView('gallery')"><i class="fas fa-th-large"></i> Gallery</button>
     <button id="btnTable" onclick="switchView('table')"><i class="fas fa-table"></i> Table</button>
   </div>
 
+  <!-- LOADING -->
   <div id="loadingIndicator" class="loading-text">
     <div class="spinner"></div> Waiting for CSV upload…
   </div>
 
+  <!-- ANALYTICS -->
   <div id="analyticsView" style="display:none;">
     <div class="charts-grid">
       <div class="chart-card">
@@ -439,6 +455,7 @@
     </div>
   </div>
 
+  <!-- GALLERY -->
   <div id="galleryView" style="display:none;">
     <div id="galleryContainer" class="gallery-grid"></div>
     <div id="galleryLoadMore" class="gallery-load-more" style="display:none;">
@@ -450,6 +467,7 @@
     </div>
   </div>
 
+  <!-- TABLE -->
   <div id="tableView" style="display:none;">
     <div class="table-wrapper">
       <div class="table-header">
@@ -483,6 +501,7 @@
     </div>
   </div>
 
+  <!-- LIGHTBOX (zoom overlay) -->
   <div class="lightbox" id="lightbox">
     <span class="close-btn" onclick="closeLightbox()">&times;</span>
     <img id="lightboxImg" src="" alt="Zoomed image" />
@@ -519,22 +538,19 @@ function colorForAction(a, i) {
 
 /* ---------------- ROBUST CSV PARSER (handles , ; and tabs) ---------------- */
 function parseCSV(text) {
-  // Strip BOM
   if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
-  
   const lines = text.split(/\r?\n/).filter(l => l.trim() !== '');
   if (!lines.length) return [];
 
-  // Detect delimiter from first line: tab, semicolon, or comma
   const firstLine = lines[0];
   const tabCount = (firstLine.match(/\t/g) || []).length;
   const semiCount = (firstLine.match(/;/g) || []).length;
   const commaCount = (firstLine.match(/,/g) || []).length;
-  
+
   let delim = ',';
   if (tabCount >= semiCount && tabCount >= commaCount && tabCount > 0) delim = '\t';
   else if (semiCount > commaCount) delim = ';';
-  
+
   console.log(`CSV parser: detected delimiter "${delim === '\t' ? 'TAB' : delim}" (tab=${tabCount}, semi=${semiCount}, comma=${commaCount})`);
 
   const parseLine = (line) => {
@@ -555,13 +571,12 @@ function parseCSV(text) {
   const rows = [];
   for (let i = 1; i < lines.length; i++) {
     const vals = parseLine(lines[i]);
-    // Skip rows that are too short
     if (vals.length < Math.max(1, headers.length - 2)) continue;
     const obj = {};
     headers.forEach((h, idx) => obj[h] = vals[idx] || '');
     rows.push(obj);
   }
-  console.log(`Parsed ${rows.length} data rows`);
+  console.log(`Parsed ${rows.length} data rows. Sample row:`, rows[0]);
   return rows;
 }
 
@@ -575,31 +590,39 @@ function getColumnValue(row, possibleNames) {
   return '';
 }
 
-function detectImageColumn(row, possibleNames) {
-  // First try known column names
+// Check if a string looks like an image URL
+function isImageUrl(s) {
+  if (!s || typeof s !== 'string') return false;
+  const t = s.trim();
+  return t.startsWith('http://') || t.startsWith('https://') || 
+         t.startsWith('/') || t.startsWith('data:image') || t.startsWith('www.');
+}
+
+// Detect image column with keyword priority.
+// keywordHints: array of substrings to look for in the column name
+// (e.g., ['input'], ['output', 'result'], ['manual'])
+function detectImageColumn(row, possibleNames, keywordHints) {
+  // 1. Try exact known column names first (highest priority)
   for (const name of possibleNames) {
     const val = row[name];
-    if (val && val.toString().trim() !== '') {
-      const s = val.toString().trim();
-      if (s.startsWith('http') || s.startsWith('/') || s.startsWith('data:image') || s.startsWith('www.')) {
-        return s;
-      }
+    if (val && isImageUrl(val.toString())) {
+      return val.toString().trim();
     }
   }
-  // Fallback: look for any URL-like value in the row
+
+  // 2. Try any column whose name contains one of the keyword hints
   for (const key in row) {
-    const val = row[key];
-    if (val && val.toString().trim() !== '') {
-      const s = val.toString().trim();
-      if ((s.startsWith('http') || s.startsWith('/') || s.startsWith('data:image')) && 
-          !key.toLowerCase().includes('email') && 
-          !key.toLowerCase().includes('comment') &&
-          !key.toLowerCase().includes('id')) {
-        // Additional image extension check is not reliable for URLs
-        return s;
+    const keyLower = key.toLowerCase();
+    if (keywordHints.some(k => keyLower.includes(k))) {
+      const val = row[key];
+      if (val && isImageUrl(val.toString())) {
+        return val.toString().trim();
       }
     }
   }
+
+  // 3. No blind fallback — return empty so the slot shows "No image"
+  //    instead of accidentally showing the wrong image.
   return '';
 }
 
@@ -612,11 +635,11 @@ function getUserId(r) {
   const keys = ['User Details - Rejected By User__email_id','rejected_by_user_email','User Email','user_email'];
   return getColumnValue(r, keys) || 'Unknown';
 }
-function getDate(r) { 
+function getDate(r) {
   const keys = ['created_on', 'Date', 'created_at', 'timestamp'];
   return getColumnValue(r, keys) || '';
 }
-function getReject(r) { 
+function getReject(r) {
   const keys = ['rejected_comment', 'Reject Comment', 'comment', 'reject_reason'];
   return getColumnValue(r, keys) || '';
 }
@@ -631,15 +654,15 @@ function getId(r) {
 
 function getInputImage(r) {
   const keys = ['input_image', 'input_url', 'Input Image', 'input_image_url', 'input'];
-  return detectImageColumn(r, keys);
+  return detectImageColumn(r, keys, ['input']);
 }
 function getOutputImage(r) {
   const keys = ['output_image', 'output_url', 'Output Image', 'output_image_url', 'output'];
-  return detectImageColumn(r, keys);
+  return detectImageColumn(r, keys, ['output', 'result']);
 }
 function getManualImage(r) {
   const keys = ['manual_image', 'manual_url', 'Manual Image', 'manual_image_url', 'manual'];
-  return detectImageColumn(r, keys);
+  return detectImageColumn(r, keys, ['manual']);
 }
 
 /* ---------------- FILE UPLOAD ---------------- */
@@ -841,10 +864,12 @@ function renderGallery(data) {
         img.loading = 'lazy';
         img.addEventListener('error', function() {
           this.style.display = 'none';
-          const ph = document.createElement('div');
-          ph.className = 'placeholder';
-          ph.innerHTML = '<i class="fas fa-image"></i> No image';
-          wrapper.appendChild(ph);
+          if (!wrapper.querySelector('.placeholder')) {
+            const ph = document.createElement('div');
+            ph.className = 'placeholder';
+            ph.innerHTML = '<i class="fas fa-image"></i> No image';
+            wrapper.appendChild(ph);
+          }
         });
         img.addEventListener('click', (e) => {
           e.stopPropagation();
@@ -968,8 +993,12 @@ function renderTable(data) {
 
 function sortTable(key) {
   if (!filteredData.length) return;
-  sortKey = key;
-  sortAsc = sortKey === key ? !sortAsc : true;
+  if (sortKey === key) {
+    sortAsc = !sortAsc;
+  } else {
+    sortKey = key;
+    sortAsc = true;
+  }
 
   filteredData.sort((a, b) => {
     let va, vb;
@@ -998,7 +1027,7 @@ function nextPage() {
   if (currentPage < totalPages) { currentPage++; renderTable(filteredData); }
 }
 
-/* Wire up filter change events */
+/* ---------------- WIRE UP FILTER EVENTS ---------------- */
 document.addEventListener('DOMContentLoaded', () => {
   ['userFilter','enterpriseFilter','rejectFilter','dateFrom','dateTo'].forEach(id => {
     const el = document.getElementById(id);
