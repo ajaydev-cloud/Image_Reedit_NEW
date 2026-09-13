@@ -143,6 +143,19 @@
     border-radius: 3px; margin-right: 5px;
   }
 
+  /* Scrollable wrapper for the "all users" stacked chart */
+  .chart-scroll {
+    overflow-x: auto;
+    overflow-y: hidden;
+    width: 100%;
+    padding-bottom: 8px;
+    border-radius: 8px;
+  }
+  .chart-scroll::-webkit-scrollbar { height: 10px; }
+  .chart-scroll::-webkit-scrollbar-track { background: #f1f4f9; border-radius: 5px; }
+  .chart-scroll::-webkit-scrollbar-thumb { background: #c7d2e0; border-radius: 5px; }
+  .chart-scroll::-webkit-scrollbar-thumb:hover { background: #a8b8cc; }
+
   .gallery-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
@@ -420,7 +433,6 @@
   <div id="analyticsView" style="display:none;">
     <div class="charts-grid">
 
-      <!-- PIE: Last 24 hours only (the "extra" chart you requested) -->
       <div class="chart-card">
         <h3>
           <i class="fas fa-clock" style="color:#4F46E5;margin-right:6px;"></i>
@@ -430,7 +442,6 @@
         <div class="chart-container"><canvas id="actionChart"></canvas></div>
       </div>
 
-      <!-- TOP 10 USERS: Full CSV data -->
       <div class="chart-card">
         <h3>
           <i class="fas fa-users" style="color:#4F46E5;margin-right:6px;"></i>
@@ -439,7 +450,6 @@
         <div class="chart-container"><canvas id="userChart"></canvas></div>
       </div>
 
-      <!-- TIMELINE: Full CSV data -->
       <div class="chart-card full-width">
         <h3>
           <i class="fas fa-calendar-alt" style="color:#4F46E5;margin-right:6px;"></i>
@@ -448,13 +458,16 @@
         <div class="chart-container"><canvas id="timelineChart"></canvas></div>
       </div>
 
-      <!-- STACKED: Full CSV data -->
       <div class="chart-card full-width">
         <h3>
           <i class="fas fa-layer-group" style="color:#4F46E5;margin-right:6px;"></i>
-          Action vs Top Users <span style="color:#10b981;">(Full CSV, stacked)</span>
+          Action vs <strong>All Users</strong> <span style="color:#10b981;">(Full CSV, stacked — scroll horizontally)</span>
         </h3>
-        <div class="chart-container"><canvas id="stackedChart"></canvas></div>
+        <div class="chart-scroll" id="stackedScrollWrapper">
+          <div class="chart-container" id="stackedContainer" style="height: 260px;">
+            <canvas id="stackedChart"></canvas>
+          </div>
+        </div>
       </div>
 
     </div>
@@ -788,10 +801,10 @@ function renderCurrentView() {
 
 /* =====================================================
    ANALYTICS
-   - Pie           → LAST 24 HOURS only
-   - Top 10 bar    → FULL CSV
-   - Timeline      → FULL CSV
-   - Stacked bar   → FULL CSV
+   - Pie        → LAST 24 HOURS
+   - Top 10 bar → FULL CSV
+   - Timeline   → FULL CSV
+   - Stacked    → FULL CSV, ALL USERS, scrollable
    ===================================================== */
 function renderAnalytics(data) {
   ['actionChart','userChart','timelineChart','stackedChart'].forEach(id => {
@@ -803,7 +816,7 @@ function renderAnalytics(data) {
     return;
   }
 
-  /* ---------- 1. PIE: Last 24 Hours only ---------- */
+  /* ---------- 1. PIE: Last 24 Hours ---------- */
   const recentData = filterLast24Hours(data);
   const legendEl = document.getElementById('colorLegend');
 
@@ -952,7 +965,7 @@ function renderAnalytics(data) {
     }
   });
 
-  /* ---------- 4. STACKED BAR — FULL CSV ---------- */
+  /* ---------- 4. STACKED BAR — ALL USERS (FULL CSV) ---------- */
   const fullActionCounts = {};
   data.forEach(r => {
     const a = getAction(r);
@@ -962,34 +975,74 @@ function renderAnalytics(data) {
     .sort((a, b) => fullActionCounts[b] - fullActionCounts[a])
     .slice(0, 8);
 
-  const stackedLabels = top10Full.map(u => u.length > 20 ? u.slice(0, 18) + '…' : u);
+  // ALL users sorted descending by total task count
+  const allUsersSorted = Object.keys(fullUserCounts)
+    .sort((a, b) => fullUserCounts[b] - fullUserCounts[a]);
+
+  console.log(`Stacked chart: showing ${allUsersSorted.length} users`);
+
+  // Pre-index actions per user for performance (avoid O(n²) filter in the loop)
+  const userActionMatrix = {};
+  allUsersSorted.forEach(u => userActionMatrix[u] = {});
+  data.forEach(r => {
+    const u = getUserId(r);
+    const a = getAction(r);
+    if (userActionMatrix[u] && topActions.includes(a)) {
+      userActionMatrix[u][a] = (userActionMatrix[u][a] || 0) + 1;
+    }
+  });
+
+  const stackedLabels = allUsersSorted;
   const stackedDatasets = topActions.map((action, i) => {
-    const counts = top10Full.map(u =>
-      data.filter(r => getUserId(r) === u && getAction(r) === action).length
-    );
+    const counts = allUsersSorted.map(u => userActionMatrix[u][action] || 0);
     return {
       label: action,
       data: counts,
       backgroundColor: colorForAction(action, i),
       borderRadius: 4,
-      maxBarThickness: 40
+      maxBarThickness: 30
     };
   });
+
+  // Dynamically size the inner chart container so all bars fit — outer wrapper scrolls
+  const innerContainer = document.getElementById('stackedContainer');
+  const chartWidth = Math.max(800, allUsersSorted.length * 42);
+  innerContainer.style.width = chartWidth + 'px';
+  innerContainer.style.height = '260px';
 
   chartInstances.stackedChart = new Chart(document.getElementById('stackedChart'), {
     type: 'bar',
     data: { labels: stackedLabels, datasets: stackedDatasets },
     options: {
-      responsive: true, maintainAspectRatio: false,
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: false,
       plugins: {
         legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 }, padding: 8 } },
         tooltip: {
-          callbacks: { title: (items) => top10Full[items[0].dataIndex] || 'No data' }
+          callbacks: {
+            title: (items) => allUsersSorted[items[0].dataIndex] || 'No data',
+            label: (ctx) => `${ctx.dataset.label}: ${ctx.raw} tasks`
+          }
         }
       },
       scales: {
-        x: { stacked: true, ticks: { font: { size: 10 }, maxRotation: 45, minRotation: 0 }, grid: { display: false } },
-        y: { stacked: true, beginAtZero: true, ticks: { precision: 0, font: { size: 10 } }, grid: { color: '#eef2f6' } }
+        x: {
+          stacked: true,
+          ticks: {
+            font: { size: 9 },
+            maxRotation: 90,
+            minRotation: 45,
+            autoSkip: false
+          },
+          grid: { display: false }
+        },
+        y: {
+          stacked: true,
+          beginAtZero: true,
+          ticks: { precision: 0, font: { size: 10 } },
+          grid: { color: '#eef2f6' }
+        }
       }
     }
   });
