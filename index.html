@@ -420,20 +420,20 @@
   <div id="analyticsView" style="display:none;">
     <div class="charts-grid">
       <div class="chart-card">
-        <h3><i class="fas fa-chart-pie" style="color:#4F46E5;margin-right:6px;"></i>Task Distribution by User (Last 24 Hours)</h3>
+        <h3><i class="fas fa-chart-pie" style="color:#4F46E5;margin-right:6px;"></i>Task Distribution by User (Latest 24-Hour Window)</h3>
         <div class="color-list" id="colorLegend"></div>
         <div class="chart-container"><canvas id="actionChart"></canvas></div>
       </div>
       <div class="chart-card">
-        <h3><i class="fas fa-users" style="color:#4F46E5;margin-right:6px;"></i>Top 10 Users by Tasks (Last 24 Hours)</h3>
+        <h3><i class="fas fa-users" style="color:#4F46E5;margin-right:6px;"></i>Top 10 Users by Tasks (Latest 24-Hour Window)</h3>
         <div class="chart-container"><canvas id="userChart"></canvas></div>
       </div>
       <div class="chart-card full-width">
-        <h3><i class="fas fa-calendar-alt" style="color:#4F46E5;margin-right:6px;"></i>Tasks by Date</h3>
+        <h3><i class="fas fa-calendar-alt" style="color:#4F46E5;margin-right:6px;"></i>Tasks by Date (Full filtered range)</h3>
         <div class="chart-container"><canvas id="timelineChart"></canvas></div>
       </div>
       <div class="chart-card full-width">
-        <h3><i class="fas fa-layer-group" style="color:#4F46E5;margin-right:6px;"></i>Action vs Top Users (stacked, Last 24 Hours)</h3>
+        <h3><i class="fas fa-layer-group" style="color:#4F46E5;margin-right:6px;"></i>Action vs Top Users (Latest 24-Hour Window)</h3>
         <div class="chart-container"><canvas id="stackedChart"></canvas></div>
       </div>
     </div>
@@ -618,17 +618,38 @@ function getManualImage(r) {
   return detectImageColumn(r, ['manual_image', 'manual_url', 'Manual Image', 'manual_image_url', 'manual'], ['manual']);
 }
 
-/* ---------------- LAST 24 HOURS FILTER ---------------- */
+/* ---------------- LAST 24 HOURS (anchored to LATEST record) ---------------- */
 function filterLast24Hours(data) {
-  const now = Date.now();
-  const cutoff = now - (24 * 60 * 60 * 1000);
+  // Step 1: Find the newest timestamp in the data
+  let maxTime = 0;
+  data.forEach(r => {
+    const d = getDate(r);
+    if (d) {
+      const t = new Date(d).getTime();
+      if (!isNaN(t) && t > maxTime) maxTime = t;
+    }
+  });
+
+  if (!maxTime) {
+    console.log('Last 24h filter: no valid dates found in data');
+    return [];
+  }
+
+  // Step 2: cutoff = maxTime - 24 hours
+  const cutoff = maxTime - (24 * 60 * 60 * 1000);
+
+  // Step 3: filter rows within [cutoff, maxTime]
   const filtered = data.filter(r => {
     const d = getDate(r);
     if (!d) return false;
     const t = new Date(d).getTime();
-    return !isNaN(t) && t >= cutoff;
+    return !isNaN(t) && t >= cutoff && t <= maxTime;
   });
-  console.log(`Last 24h filter: ${filtered.length} of ${data.length} rows within cutoff ${new Date(cutoff).toISOString()}`);
+
+  console.log(
+    `Last 24h (from ${new Date(cutoff).toISOString()} to ${new Date(maxTime).toISOString()}): ` +
+    `${filtered.length} of ${data.length} rows`
+  );
   return filtered;
 }
 
@@ -760,7 +781,8 @@ function renderCurrentView() {
 }
 
 /* =====================================================
-   ANALYTICS — Pie & bar focused on LAST 24 HOURS
+   ANALYTICS — All three "recent" charts use the SAME
+   anchored 24-hour window from filterLast24Hours()
    ===================================================== */
 function renderAnalytics(data) {
   ['actionChart','userChart','timelineChart','stackedChart'].forEach(id => {
@@ -772,52 +794,31 @@ function renderAnalytics(data) {
     return;
   }
 
-  // Filter to last 24 hours
+  // Single source of truth for the 24h window
   const recentData = filterLast24Hours(data);
-
-  /* ---------- 1. PIE: Task Distribution by User (Last 24h) ---------- */
   const legendEl = document.getElementById('colorLegend');
 
+  /* ---------- 1. PIE: Task Distribution by User (24h window) ---------- */
   if (!recentData.length) {
-    // No data in last 24h — show a friendly message
     legendEl.innerHTML =
       `<div style="color:#ef4444;font-size:12px;padding:8px 0;">
-        ⚠ No tasks found in the last 24 hours.
+        ⚠ No tasks found in the latest 24-hour window.
       </div>`;
-    // Draw an empty grey pie with a hint
     chartInstances.actionChart = new Chart(document.getElementById('actionChart'), {
       type: 'pie',
       data: {
         labels: ['No data'],
-        datasets: [{
-          data: [1],
-          backgroundColor: ['#e5e7eb'],
-          borderWidth: 2,
-          borderColor: '#fff'
-        }]
+        datasets: [{ data: [1], backgroundColor: ['#e5e7eb'], borderWidth: 2, borderColor: '#fff' }]
       },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { display: false },
-          tooltip: { enabled: false }
-        }
-      }
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } } }
     });
   } else {
-    // Count tasks per user in the last 24h
     const userCounts = {};
     recentData.forEach(r => {
       const u = getUserId(r);
       if (u && u !== 'Unknown') userCounts[u] = (userCounts[u] || 0) + 1;
     });
-
-    // Sort descending
-    const sortedUsers = Object.keys(userCounts)
-      .sort((a, b) => userCounts[b] - userCounts[a]);
-
-    // Take top 10; group rest as "Other"
+    const sortedUsers = Object.keys(userCounts).sort((a, b) => userCounts[b] - userCounts[a]);
     const top10 = sortedUsers.slice(0, 10);
     const restUsers = sortedUsers.slice(10);
     const restTotal = restUsers.reduce((s, u) => s + userCounts[u], 0);
@@ -828,13 +829,11 @@ function renderAnalytics(data) {
       pieLabels.push(`Other (${restUsers.length} users)`);
       pieValues.push(restTotal);
     }
-
     const totalTasks = pieValues.reduce((s, v) => s + v, 0);
 
-    // Legend
     legendEl.innerHTML =
       `<div style="color:#4F46E5;font-size:11px;margin-bottom:6px;font-weight:600;">
-        Last 24 hours — ${totalTasks} tasks from ${sortedUsers.length} user${sortedUsers.length !== 1 ? 's' : ''}
+        Latest 24h — ${totalTasks} tasks from ${sortedUsers.length} user${sortedUsers.length !== 1 ? 's' : ''}
       </div>` +
       pieLabels.map((u, i) =>
         `<span><span class="color-swatch" style="background:${COLORS[i % COLORS.length]}"></span>${u} (${pieValues[i]})</span>`
@@ -847,13 +846,11 @@ function renderAnalytics(data) {
         datasets: [{
           data: pieValues,
           backgroundColor: pieLabels.map((_, i) => COLORS[i % COLORS.length]),
-          borderWidth: 2,
-          borderColor: '#fff'
+          borderWidth: 2, borderColor: '#fff'
         }]
       },
       options: {
-        responsive: true,
-        maintainAspectRatio: false,
+        responsive: true, maintainAspectRatio: false,
         plugins: {
           legend: { display: false },
           tooltip: {
@@ -870,18 +867,15 @@ function renderAnalytics(data) {
     });
   }
 
-  /* ---------- 2. HORIZONTAL BAR: Top 10 Users (Last 24h) ---------- */
-  const userCountsBar = {};
+  /* ---------- 2. TOP 10 USERS BAR (24h window) ---------- */
+  const barCounts = {};
   recentData.forEach(r => {
     const u = getUserId(r);
-    if (u && u !== 'Unknown') userCountsBar[u] = (userCountsBar[u] || 0) + 1;
+    if (u && u !== 'Unknown') barCounts[u] = (barCounts[u] || 0) + 1;
   });
-  const top10Bar = Object.keys(userCountsBar)
-    .sort((a, b) => userCountsBar[b] - userCountsBar[a])
-    .slice(0, 10);
+  const top10Bar = Object.keys(barCounts).sort((a, b) => barCounts[b] - barCounts[a]).slice(0, 10);
 
   if (!top10Bar.length) {
-    // Draw placeholder
     chartInstances.userChart = new Chart(document.getElementById('userChart'), {
       type: 'bar',
       data: { labels: ['No data'], datasets: [{ data: [0], backgroundColor: '#e5e7eb' }] },
@@ -898,16 +892,14 @@ function renderAnalytics(data) {
         labels: top10Bar.map(u => u.length > 28 ? u.slice(0, 26) + '…' : u),
         datasets: [{
           label: 'Tasks',
-          data: top10Bar.map(u => userCountsBar[u]),
+          data: top10Bar.map(u => barCounts[u]),
           backgroundColor: '#4F46E5',
           borderRadius: 6,
           maxBarThickness: 22
         }]
       },
       options: {
-        indexAxis: 'y',
-        responsive: true,
-        maintainAspectRatio: false,
+        indexAxis: 'y', responsive: true, maintainAspectRatio: false,
         plugins: {
           legend: { display: false },
           tooltip: {
@@ -925,7 +917,7 @@ function renderAnalytics(data) {
     });
   }
 
-  /* ---------- 3. LINE: Tasks by Date (all filtered data, not just 24h) ---------- */
+  /* ---------- 3. TIMELINE (full filtered range — intentionally not 24h) ---------- */
   const dateCounts = {};
   data.forEach(r => {
     const d = getDate(r);
@@ -948,16 +940,12 @@ function renderAnalytics(data) {
         data: sortedDates.map(d => dateCounts[d]),
         borderColor: '#4F46E5',
         backgroundColor: 'rgba(79,70,229,0.1)',
-        fill: true,
-        tension: 0.35,
-        pointRadius: 3,
-        pointBackgroundColor: '#4F46E5',
-        borderWidth: 2
+        fill: true, tension: 0.35, pointRadius: 3,
+        pointBackgroundColor: '#4F46E5', borderWidth: 2
       }]
     },
     options: {
-      responsive: true,
-      maintainAspectRatio: false,
+      responsive: true, maintainAspectRatio: false,
       plugins: { legend: { display: false } },
       scales: {
         x: { ticks: { font: { size: 10 }, maxRotation: 45, minRotation: 0 }, grid: { display: false } },
@@ -966,8 +954,7 @@ function renderAnalytics(data) {
     }
   });
 
-  /* ---------- 4. STACKED BAR: Action vs Top Users (Last 24h) ---------- */
-  const topUsersStacked = top10Bar.slice(); // reuse
+  /* ---------- 4. STACKED BAR (24h window) ---------- */
   const actionCountsGlobal = {};
   recentData.forEach(r => {
     const a = getAction(r);
@@ -977,23 +964,16 @@ function renderAnalytics(data) {
     .sort((a, b) => actionCountsGlobal[b] - actionCountsGlobal[a])
     .slice(0, 8);
 
-  let stackedDatasets;
-  let stackedLabels;
-
-  if (!topUsersStacked.length || !topActions.length) {
+  let stackedLabels, stackedDatasets;
+  if (!top10Bar.length || !topActions.length) {
     stackedLabels = ['No data'];
-    stackedDatasets = [{
-      label: 'No data',
-      data: [0],
-      backgroundColor: '#e5e7eb',
-      borderRadius: 4
-    }];
+    stackedDatasets = [{ label: 'No data', data: [0], backgroundColor: '#e5e7eb', borderRadius: 4 }];
   } else {
-    stackedLabels = topUsersStacked.map(u => u.length > 20 ? u.slice(0, 18) + '…' : u);
+    stackedLabels = top10Bar.map(u => u.length > 20 ? u.slice(0, 18) + '…' : u);
     stackedDatasets = topActions.map((action, i) => {
-      const counts = topUsersStacked.map(u => {
-        return recentData.filter(r => getUserId(r) === u && getAction(r) === action).length;
-      });
+      const counts = top10Bar.map(u =>
+        recentData.filter(r => getUserId(r) === u && getAction(r) === action).length
+      );
       return {
         label: action,
         data: counts,
@@ -1008,14 +988,11 @@ function renderAnalytics(data) {
     type: 'bar',
     data: { labels: stackedLabels, datasets: stackedDatasets },
     options: {
-      responsive: true,
-      maintainAspectRatio: false,
+      responsive: true, maintainAspectRatio: false,
       plugins: {
         legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 }, padding: 8 } },
         tooltip: {
-          callbacks: {
-            title: (items) => topUsersStacked[items[0].dataIndex] || 'No data'
-          }
+          callbacks: { title: (items) => top10Bar[items[0].dataIndex] || 'No data' }
         }
       },
       scales: {
