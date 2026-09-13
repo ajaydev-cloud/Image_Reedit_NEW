@@ -48,10 +48,16 @@
     background: #4F46E5; color: #fff; transition: 0.2s; white-space: nowrap;
   }
   .upload-btn:hover { background: #4338CA; transform: translateY(-1px); }
+  .upload-btn.secondary {
+    background: #fff; color: #6b7a93;
+    border: 1px solid #d1d9e6;
+  }
+  .upload-btn.secondary:hover { background: #f1f4f9; color: #1a1f36; transform: none; }
   .upload-status { font-size: 12px; padding: 4px 12px; border-radius: 6px; }
   .upload-status.success { color: #10b981; background: #d1fae5; }
   .upload-status.error { color: #ef4444; background: #fee2e2; }
   .upload-status.loading { color: #4F46E5; background: #e0e7ff; }
+  .upload-status.restored { color: #F59E0B; background: #FEF3C7; }
   .file-info { font-size: 12px; color: #6b7a93; }
   .file-info strong { color: #1a1f36; }
 
@@ -143,7 +149,6 @@
     border-radius: 3px; margin-right: 5px;
   }
 
-  /* Scrollable wrapper for the "all users" stacked chart */
   .chart-scroll {
     overflow-x: auto;
     overflow-y: hidden;
@@ -384,6 +389,9 @@
     <button class="upload-btn" onclick="handleFileUpload()">
       <i class="fas fa-cloud-upload-alt"></i> Load Data
     </button>
+    <button class="upload-btn secondary" id="clearStorageBtn" onclick="clearSavedData()" style="display:none;">
+      <i class="fas fa-trash-alt"></i> Clear Saved Data
+    </button>
     <span id="uploadStatus" class="upload-status"></span>
     <span class="file-info"><i class="fas fa-file-csv"></i> <strong id="currentFile">No file chosen</strong></span>
   </div>
@@ -526,6 +534,86 @@
 </div>
 
 <script>
+/* ============================================================
+   INDEXEDDB — persistent storage for large CSV datasets
+   (localStorage has ~5MB limit; IndexedDB handles 100s of MB)
+   ============================================================ */
+const DB_NAME = 'ImageReeditDB';
+const DB_VERSION = 1;
+const STORE_NAME = 'datasets';
+const DATASET_KEY = 'lastUpload';
+
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, DB_VERSION);
+    req.onupgradeneeded = (e) => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains(STORE_NAME)) {
+        db.createObjectStore(STORE_NAME);
+      }
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function saveDataset(data, filename) {
+  try {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE_NAME, 'readwrite');
+      const store = tx.objectStore(STORE_NAME);
+      const payload = {
+        data,
+        filename,
+        savedAt: new Date().toISOString(),
+        rowCount: data.length
+      };
+      const req = store.put(payload, DATASET_KEY);
+      req.onsuccess = () => {
+        console.log(`Saved ${data.length} rows to IndexedDB`);
+        resolve(true);
+      };
+      req.onerror = () => reject(req.error);
+    });
+  } catch (err) {
+    console.warn('Failed to save to IndexedDB:', err);
+    return false;
+  }
+}
+
+async function loadSavedDataset() {
+  try {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE_NAME, 'readonly');
+      const store = tx.objectStore(STORE_NAME);
+      const req = store.get(DATASET_KEY);
+      req.onsuccess = () => resolve(req.result || null);
+      req.onerror = () => reject(req.error);
+    });
+  } catch (err) {
+    console.warn('Failed to load from IndexedDB:', err);
+    return null;
+  }
+}
+
+async function deleteSavedDataset() {
+  try {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE_NAME, 'readwrite');
+      const store = tx.objectStore(STORE_NAME);
+      const req = store.delete(DATASET_KEY);
+      req.onsuccess = () => resolve(true);
+      req.onerror = () => reject(req.error);
+    });
+  } catch (err) {
+    console.warn('Failed to delete from IndexedDB:', err);
+    return false;
+  }
+}
+
 /* ---------------- STATE ---------------- */
 let allData = [];
 let filteredData = [];
@@ -668,7 +756,7 @@ function filterLast24Hours(data) {
     const t = new Date(d).getTime();
     return !isNaN(t) && t >= cutoff && t <= maxTime;
   });
-  console.log(`Last 24h: ${filtered.length} of ${data.length} rows (window ${new Date(cutoff).toISOString()} → ${new Date(maxTime).toISOString()})`);
+  console.log(`Last 24h: ${filtered.length} of ${data.length} rows`);
   return filtered;
 }
 
@@ -685,13 +773,18 @@ function handleFileUpload() {
   status.textContent = '⏳ Reading…';
 
   const reader = new FileReader();
-  reader.onload = (e) => {
+  reader.onload = async (e) => {
     try {
       const data = parseCSV(e.target.result);
       if (!data.length) throw new Error('CSV contains no usable rows');
       document.getElementById('currentFile').textContent = file.name;
       status.className = 'upload-status success';
       status.textContent = `✅ Loaded ${data.length} rows`;
+
+      // Persist to IndexedDB for next session
+      await saveDataset(data, file.name);
+      showClearButton(true);
+
       onDataLoaded(data);
     } catch (err) {
       status.className = 'upload-status error';
@@ -703,6 +796,52 @@ function handleFileUpload() {
   reader.readAsText(file);
 }
 
+/* ---------------- RESTORE FROM INDEXEDDB ON PAGE LOAD ---------------- */
+async function restoreFromStorage() {
+  const saved = await loadSavedDataset();
+  if (!saved || !saved.data || !saved.data.length) {
+    console.log('No saved dataset found.');
+    return false;
+  }
+  console.log(`Restoring ${saved.data.length} rows from IndexedDB (saved ${saved.savedAt})`);
+  document.getElementById('currentFile').textContent = saved.filename || '(restored)';
+  const status = document.getElementById('uploadStatus');
+  status.className = 'upload-status restored';
+  status.textContent = `🔄 Restored ${saved.data.length} rows from previous session`;
+  showClearButton(true);
+  onDataLoaded(saved.data);
+  return true;
+}
+
+async function clearSavedData() {
+  if (!confirm('Delete the saved dataset? You will need to re-upload your CSV next time.')) return;
+  await deleteSavedDataset();
+  showClearButton(false);
+  document.getElementById('uploadStatus').className = 'upload-status';
+  document.getElementById('uploadStatus').textContent = '';
+  document.getElementById('currentFile').textContent = 'No file chosen';
+  document.getElementById('csvFileInput').value = '';
+  // Reset UI
+  allData = []; filteredData = []; isDataLoaded = false;
+  document.getElementById('rowCount').textContent = '0';
+  document.getElementById('totalCount').textContent = '0';
+  document.getElementById('filteredCount').textContent = '0';
+  document.getElementById('updateTime').textContent = '—';
+  document.getElementById('loadingIndicator').style.display = 'block';
+  document.getElementById('analyticsView').style.display = 'none';
+  document.getElementById('galleryView').style.display = 'none';
+  document.getElementById('tableView').style.display = 'none';
+  ['actionChart','userChart','timelineChart','stackedChart'].forEach(id => {
+    if (chartInstances[id]) { chartInstances[id].destroy(); delete chartInstances[id]; }
+  });
+}
+
+function showClearButton(show) {
+  const btn = document.getElementById('clearStorageBtn');
+  btn.style.display = show ? 'inline-block' : 'none';
+}
+
+/* ---------------- DATA LOADED ---------------- */
 function onDataLoaded(data) {
   allData = data;
   isDataLoaded = true;
@@ -801,10 +940,6 @@ function renderCurrentView() {
 
 /* =====================================================
    ANALYTICS
-   - Pie        → LAST 24 HOURS
-   - Top 10 bar → FULL CSV
-   - Timeline   → FULL CSV
-   - Stacked    → FULL CSV, ALL USERS, scrollable
    ===================================================== */
 function renderAnalytics(data) {
   ['actionChart','userChart','timelineChart','stackedChart'].forEach(id => {
@@ -888,7 +1023,7 @@ function renderAnalytics(data) {
     });
   }
 
-  /* ---------- 2. TOP 10 USERS BAR — FULL CSV ---------- */
+  /* ---------- 2. TOP 10 USERS BAR ---------- */
   const fullUserCounts = {};
   data.forEach(r => {
     const u = getUserId(r);
@@ -928,7 +1063,7 @@ function renderAnalytics(data) {
     }
   });
 
-  /* ---------- 3. TIMELINE — FULL CSV ---------- */
+  /* ---------- 3. TIMELINE ---------- */
   const dateCounts = {};
   data.forEach(r => {
     const d = getDate(r);
@@ -965,7 +1100,7 @@ function renderAnalytics(data) {
     }
   });
 
-  /* ---------- 4. STACKED BAR — ALL USERS (FULL CSV) ---------- */
+  /* ---------- 4. STACKED BAR — ALL USERS ---------- */
   const fullActionCounts = {};
   data.forEach(r => {
     const a = getAction(r);
@@ -975,13 +1110,9 @@ function renderAnalytics(data) {
     .sort((a, b) => fullActionCounts[b] - fullActionCounts[a])
     .slice(0, 8);
 
-  // ALL users sorted descending by total task count
   const allUsersSorted = Object.keys(fullUserCounts)
     .sort((a, b) => fullUserCounts[b] - fullUserCounts[a]);
 
-  console.log(`Stacked chart: showing ${allUsersSorted.length} users`);
-
-  // Pre-index actions per user for performance (avoid O(n²) filter in the loop)
   const userActionMatrix = {};
   allUsersSorted.forEach(u => userActionMatrix[u] = {});
   data.forEach(r => {
@@ -1004,7 +1135,6 @@ function renderAnalytics(data) {
     };
   });
 
-  // Dynamically size the inner chart container so all bars fit — outer wrapper scrolls
   const innerContainer = document.getElementById('stackedContainer');
   const chartWidth = Math.max(800, allUsersSorted.length * 42);
   innerContainer.style.width = chartWidth + 'px';
@@ -1029,12 +1159,7 @@ function renderAnalytics(data) {
       scales: {
         x: {
           stacked: true,
-          ticks: {
-            font: { size: 9 },
-            maxRotation: 90,
-            minRotation: 45,
-            autoSkip: false
-          },
+          ticks: { font: { size: 9 }, maxRotation: 90, minRotation: 45, autoSkip: false },
           grid: { display: false }
         },
         y: {
@@ -1247,13 +1372,16 @@ function nextPage() {
   if (currentPage < totalPages) { currentPage++; renderTable(filteredData); }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   ['userFilter','enterpriseFilter','rejectFilter','dateFrom','dateTo'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.addEventListener('change', applyFilters);
   });
   const searchEl = document.getElementById('searchInput');
   if (searchEl) searchEl.addEventListener('input', applyFilters);
+
+  // Auto-restore from IndexedDB on page load
+  await restoreFromStorage();
 });
 </script>
 </body>
